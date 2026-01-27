@@ -142,7 +142,6 @@
             }
         }
 
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -170,7 +169,7 @@
                 class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4">
             </div>
             <p class="text-xl text-purple-300">Loading SN Quiz App...</p>
-            <p class="text-sm text-gray-500 mt-2" id="loadingStatus">Connecting to cloud...</p>
+            <p class="text-sm text-gray-500 mt-2" id="loadingStatus">Initializing...</p>
         </div>
     </div>
 
@@ -186,7 +185,6 @@
                     <span class="font-bold text-xl hidden sm:block">SN Quiz App</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <!-- Cloud Sync Status -->
                     <div id="syncStatus" class="flex items-center gap-2 text-sm">
                         <i class="fas fa-cloud text-green-400" id="syncIcon"></i>
                         <span id="syncText" class="text-green-300 hidden sm:inline">Synced</span>
@@ -213,7 +211,8 @@
                     </div>
                     <h1 class="text-4xl font-bold mb-2">SN Quiz App</h1>
                     <p class="text-purple-300">Master your knowledge with confidence</p>
-                    <div class="mt-3 flex items-center justify-center gap-2 text-sm text-green-400">
+                    <div class="mt-3 flex items-center justify-center gap-2 text-sm text-green-400"
+                        id="cloudStatusText">
                         <i class="fas fa-cloud"></i>
                         <span>Cloud-synced progress across all devices</span>
                     </div>
@@ -286,7 +285,6 @@
                     </button>
                 </div>
 
-                <!-- License Key Management -->
                 <div class="glass rounded-2xl p-6 mb-6">
                     <h2 class="text-xl font-semibold mb-4"><i class="fas fa-key text-yellow-400 mr-2"></i>License Key
                         Management</h2>
@@ -317,12 +315,9 @@
                         </button>
                     </div>
 
-                    <div id="licenseKeysList" class="space-y-2 max-h-64 overflow-y-auto">
-                        <!-- License keys will be populated here -->
-                    </div>
+                    <div id="licenseKeysList" class="space-y-2 max-h-64 overflow-y-auto"></div>
                 </div>
 
-                <!-- Statistics -->
                 <div class="glass rounded-2xl p-6 mb-6">
                     <h2 class="text-xl font-semibold mb-4"><i class="fas fa-chart-bar text-blue-400 mr-2"></i>Statistics
                     </h2>
@@ -346,7 +341,6 @@
                     </div>
                 </div>
 
-                <!-- Change Admin Password -->
                 <div class="glass rounded-2xl p-6">
                     <h2 class="text-xl font-semibold mb-4"><i class="fas fa-lock text-red-400 mr-2"></i>Change Admin
                         Password</h2>
@@ -375,22 +369,17 @@
         <!-- Dashboard -->
         <div id="dashboard" class="hide min-h-screen p-4 pt-24 pb-20">
             <div class="max-w-6xl mx-auto slide-in">
-                <!-- Welcome Header -->
                 <div class="text-center mb-8">
                     <h1 class="text-3xl md:text-4xl font-bold mb-2">Welcome to SN Quiz App</h1>
                     <p class="text-purple-300">Select a section to start your quiz journey</p>
                     <div class="mt-2 flex items-center justify-center gap-2 text-sm text-green-400">
                         <i class="fas fa-check-circle"></i>
-                        <span>Your progress is automatically saved to cloud</span>
+                        <span>Your progress is automatically saved</span>
                     </div>
                 </div>
 
-                <!-- Section Cards -->
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8" id="sectionCards">
-                    <!-- Section cards will be populated here -->
-                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="sectionCards"></div>
 
-                <!-- Final Exam Card -->
                 <div class="glass rounded-2xl p-6 card-hover cursor-pointer" onclick="startQuiz('final')">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-4">
@@ -409,7 +398,6 @@
                     </div>
                 </div>
 
-                <!-- Resume Quiz Banner -->
                 <div id="resumeBanner" class="hide glass rounded-2xl p-6 mt-8 border-2 border-purple-500/50">
                     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
@@ -434,7 +422,6 @@
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
                 <div class="grid md:grid-cols-3 gap-4 mt-8">
                     <button onclick="startStudyMode()"
                         class="glass rounded-xl p-4 flex items-center gap-4 hover:bg-white/10 transition card-hover">
@@ -468,7 +455,6 @@
                     </button>
                 </div>
 
-                <!-- Reset Progress -->
                 <div class="mt-8 text-center">
                     <button onclick="showResetModal()" class="text-gray-500 hover:text-gray-300 text-sm transition">
                         <i class="fas fa-redo mr-1"></i>Reset All Progress
@@ -477,7 +463,6 @@
             </div>
         </div>
 
-        <!-- Reset Progress Modal -->
         <div id="resetModal" class="hide fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div class="glass rounded-2xl p-8 w-full max-w-md slide-in">
                 <div class="text-center mb-6">
@@ -485,8 +470,8 @@
                         <i class="fas fa-exclamation-triangle text-3xl text-red-400"></i>
                     </div>
                     <h2 class="text-2xl font-bold mb-2">Reset All Progress?</h2>
-                    <p class="text-gray-400">This will delete all your scores, bookmarks, and progress from cloud. This
-                        action cannot be undone.</p>
+                    <p class="text-gray-400">This will delete all your scores, bookmarks, and progress. This action
+                        cannot be undone.</p>
                 </div>
                 <div class="flex gap-4">
                     <button onclick="closeResetModal()"
@@ -504,7 +489,6 @@
         <!-- Quiz Screen -->
         <div id="quizScreen" class="hide min-h-screen p-4 pt-24 pb-20">
             <div class="max-w-3xl mx-auto">
-                <!-- Quiz Header -->
                 <div class="glass rounded-2xl p-4 mb-6 slide-in">
                     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
@@ -517,7 +501,6 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-6">
-                            <!-- Timer -->
                             <div class="flex items-center gap-2" id="timerContainer">
                                 <svg class="w-12 h-12" viewBox="0 0 36 36">
                                     <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.1)"
@@ -528,21 +511,18 @@
                                 </svg>
                                 <span id="timerDisplay" class="text-xl font-bold">90</span>
                             </div>
-                            <!-- Score -->
                             <div class="text-center">
                                 <p class="text-xl font-bold text-green-400" id="currentScore">0</p>
                                 <p class="text-xs text-gray-400">Score</p>
                             </div>
                         </div>
                     </div>
-                    <!-- Progress Bar -->
                     <div class="mt-4 bg-white/10 rounded-full h-2 overflow-hidden">
                         <div id="quizProgressBar" class="h-full gradient-bg transition-all duration-300"
                             style="width: 0%"></div>
                     </div>
                 </div>
 
-                <!-- Question Card -->
                 <div id="questionCard" class="glass rounded-2xl p-6 mb-6 slide-in">
                     <div class="flex items-start justify-between mb-4">
                         <span class="px-3 py-1 bg-purple-500/30 text-purple-300 rounded-full text-sm"
@@ -554,12 +534,9 @@
                     </div>
                     <h3 class="text-xl font-semibold mb-6" id="questionText">Loading question...</h3>
 
-                    <div id="optionsContainer" class="space-y-3">
-                        <!-- Options will be populated here -->
-                    </div>
+                    <div id="optionsContainer" class="space-y-3"></div>
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="flex justify-between items-center slide-in">
                     <button id="prevBtn" onclick="previousQuestion()"
                         class="px-6 py-3 glass rounded-xl hover:bg-white/10 transition hide">
@@ -575,7 +552,6 @@
                     </button>
                 </div>
 
-                <!-- Answer Feedback -->
                 <div id="feedbackContainer" class="hide mt-6 glass rounded-2xl p-6 slide-in">
                     <div id="feedbackContent"></div>
                 </div>
@@ -616,7 +592,7 @@
 
                     <div class="mt-4 flex items-center justify-center gap-2 text-sm text-green-400">
                         <i class="fas fa-cloud-upload-alt"></i>
-                        <span>Progress saved to cloud</span>
+                        <span>Progress saved</span>
                     </div>
                 </div>
 
@@ -647,9 +623,7 @@
                     </button>
                 </div>
                 <p class="text-purple-300 mb-6">Select a section to study without timer pressure:</p>
-                <div id="studyModeSections" class="space-y-2 max-h-64 overflow-y-auto">
-                    <!-- Sections will be populated here -->
-                </div>
+                <div id="studyModeSections" class="space-y-2 max-h-64 overflow-y-auto"></div>
             </div>
         </div>
 
@@ -675,51 +649,17 @@
     </div>
 
     <script>
-        // ==================== SUPABASE CONFIGURATION ====================
-        // IMPORTANT: Replace these with your Supabase project credentials
-        // Leave as-is to run in OFFLINE MODE (no cloud sync)
-        const SUPABASE_URL = 'https://idromcktecrfctliraru.supabase.co'; // e.g., 'https://xxxxx.supabase.co'
-        const SUPABASE_ANON_KEY = 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4'; // Your anon/public key
-
-        // Initialize Supabase client
-        let supabaseClient = null;
-        let isOnline = navigator.onLine;
-        let isOfflineMode = false; // Track if running without cloud
-
-        // ==================== DEBUG LOGGING ====================
-        const DEBUG = true; // Set to false to disable console logs
-
-        function debugLog(category, message, data = null) {
-            if (!DEBUG) return;
-            const timestamp = new Date().toISOString().substr(11, 12);
-            const prefix = `[${timestamp}] [${category}]`;
-            if (data) {
-                console.log(`${prefix} ${message}`, data);
-            } else {
-                console.log(`${prefix} ${message}`);
-            }
-        }
-
-        function debugError(category, message, error = null) {
-            const timestamp = new Date().toISOString().substr(11, 12);
-            const prefix = `[${timestamp}] [${category}] ❌`;
-            if (error) {
-                console.error(`${prefix} ${message}`, error);
-            } else {
-                console.error(`${prefix} ${message}`);
-            }
-        }
-
-        function debugSuccess(category, message) {
-            const timestamp = new Date().toISOString().substr(11, 12);
-            console.log(`[${timestamp}] [${category}] ✅ ${message}`);
-        }
-
         // ==================== CONFIGURATION ====================
+        // Replace these with your Supabase credentials
+        // Leave as-is to run in OFFLINE MODE
+        const SUPABASE_URL = 'https://idromcktecrfctliraru.supabase.co';
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4';
+
+        // App Configuration
         const CONFIG = {
-            questionTimeLimit: 90, // seconds
-            finalExamTimeLimit: 90 * 60, // 90 minutes in seconds
-            totalQuestions: 204, // Total questions in questions.json
+            questionTimeLimit: 90,
+            finalExamTimeLimit: 90 * 60,
+            totalQuestions: 204,
             sectionsConfig: [
                 { id: 1, name: 'Section 1', start: 1, end: 60, icon: 'fa-database' },
                 { id: 2, name: 'Section 2', start: 61, end: 120, icon: 'fa-cogs' },
@@ -729,9 +669,10 @@
             finalExamQuestions: 60
         };
 
-        debugLog('CONFIG', 'Configuration loaded', CONFIG);
+        // ==================== GLOBAL VARIABLES ====================
+        let supabaseClient = null;
+        let isOfflineMode = true;
 
-        // ==================== STATE MANAGEMENT ====================
         let state = {
             currentUser: null,
             isAdmin: false,
@@ -753,273 +694,170 @@
             isSyncing: false
         };
 
-        // ==================== SUPABASE INITIALIZATION ====================
-        async function initSupabase() {
-            debugLog('INIT', '========== STARTING SUPABASE INITIALIZATION ==========');
-            debugLog('INIT', 'SUPABASE_URL:', SUPABASE_URL);
-            debugLog('INIT', 'SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 20) + '...' : 'NOT SET');
+        // ==================== DEBUG LOGGING ====================
+        function log(msg, data = null) {
+            const time = new Date().toISOString().substr(11, 12);
+            if (data) {
+                console.log(`[${time}] ${msg}`, data);
+            } else {
+                console.log(`[${time}] ${msg}`);
+            }
+        }
+
+        // ==================== INITIALIZATION ====================
+        async function init() {
+            log('🚀 Starting SN Quiz App...');
+            updateLoadingStatus('Initializing...');
 
             try {
-                updateLoadingStatus('Checking cloud connection...');
+                // Step 1: Load questions
+                log('📚 Loading questions...');
+                updateLoadingStatus('Loading questions...');
+                await loadQuestions();
+                log(`✅ Loaded ${state.questions.length} questions`);
 
-                // Check if Supabase is configured
-                if (SUPABASE_URL === 'https://idromcktecrfctliraru.supabase.co' || SUPABASE_ANON_KEY === 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4') {
-                    debugLog('INIT', '⚠️ Supabase credentials not configured - using placeholder values');
-                    debugLog('INIT', 'To enable cloud sync, replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY');
-                    updateLoadingStatus('Running in offline mode...');
-                    isOfflineMode = true;
-                    debugSuccess('INIT', 'Switched to OFFLINE mode');
-                    return false;
+                // Step 2: Try to connect to Supabase
+                log('☁️ Checking cloud connection...');
+                updateLoadingStatus('Checking cloud...');
+                await initSupabase();
+
+                // Step 3: Setup offline defaults if needed
+                if (isOfflineMode) {
+                    log('📴 Running in offline mode');
+                    setupOfflineDefaults();
+                    updateSyncStatus('offline');
+                    document.getElementById('cloudStatusText').innerHTML =
+                        '<i class="fas fa-database"></i><span>Running in offline mode</span>';
                 }
 
-                debugLog('INIT', 'Supabase credentials found, attempting connection...');
-                updateLoadingStatus('Connecting to cloud...');
-
-                // Check if Supabase library is loaded
-                if (typeof window.supabase === 'undefined') {
-                    debugError('INIT', 'Supabase JS library not loaded! Check CDN link.');
-                    updateLoadingStatus('Error: Supabase library not loaded');
-                    isOfflineMode = true;
-                    return false;
+                // Step 4: Check for saved session
+                const savedUser = localStorage.getItem('snquiz_current_user');
+                if (savedUser) {
+                    log('👤 Found saved user session');
+                    state.currentUser = savedUser;
+                    loadFromLocalStorage();
                 }
 
-                debugLog('INIT', 'Creating Supabase client...');
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                debugSuccess('INIT', 'Supabase client created');
+                // Step 5: Show the app
+                log('✅ App ready!');
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hide');
+                    document.getElementById('app').classList.remove('hide');
 
-                // Test connection with timeout
-                debugLog('INIT', 'Testing database connection (5 second timeout)...');
+                    if (state.currentUser) {
+                        showDashboard();
+                    } else {
+                        showLoginScreen();
+                    }
+                }, 500);
+
+            } catch (error) {
+                log('❌ Init error:', error);
+                updateLoadingStatus('Starting in offline mode...');
+                isOfflineMode = true;
+                setupOfflineDefaults();
+
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hide');
+                    document.getElementById('app').classList.remove('hide');
+                    showLoginScreen();
+                }, 500);
+            }
+        }
+
+        async function initSupabase() {
+            // Check if credentials are configured
+            if (SUPABASE_URL === 'https://idromcktecrfctliraru.supabase.co' || SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4') {
+                log('⚠️ Supabase not configured - using offline mode');
+                isOfflineMode = true;
+                return;
+            }
+
+            // Check if Supabase library loaded
+            if (typeof window.supabase === 'undefined') {
+                log('❌ Supabase library not loaded');
+                isOfflineMode = true;
+                return;
+            }
+
+            try {
+                log('🔌 Connecting to Supabase...');
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+                // Test connection with 3 second timeout
+                const testPromise = supabaseClient.from('license_keys').select('count').limit(1);
                 const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Connection timeout after 5 seconds')), 5000)
+                    setTimeout(() => reject(new Error('Timeout')), 3000)
                 );
 
-                const connectionPromise = supabaseClient.from('license_keys').select('count').limit(1);
+                const { error } = await Promise.race([testPromise, timeoutPromise]);
 
-                try {
-                    const { data, error } = await Promise.race([connectionPromise, timeoutPromise]);
-
-                    if (error) {
-                        debugError('INIT', 'Supabase query error:', error);
-                        debugLog('INIT', 'Error details:', {
-                            message: error.message,
-                            code: error.code,
-                            hint: error.hint,
-                            details: error.details
-                        });
-                        updateLoadingStatus('Cloud unavailable, using offline mode...');
-                        isOfflineMode = true;
-                        return false;
-                    }
-
-                    debugSuccess('INIT', 'Database connection successful!');
-                    debugLog('INIT', 'Query result:', data);
-                    isOfflineMode = false;
-                    return true;
-                } catch (e) {
-                    debugError('INIT', 'Connection failed:', e.message);
-                    updateLoadingStatus('Cloud unavailable, using offline mode...');
+                if (error) {
+                    log('❌ Supabase connection failed:', error.message);
                     isOfflineMode = true;
-                    return false;
+                } else {
+                    log('✅ Supabase connected!');
+                    isOfflineMode = false;
                 }
-            } catch (error) {
-                debugError('INIT', 'Failed to initialize Supabase:', error);
-                updateLoadingStatus('Using offline mode...');
+            } catch (e) {
+                log('❌ Supabase error:', e.message);
                 isOfflineMode = true;
-                return false;
             }
         }
 
-        // ==================== CLOUD SYNC FUNCTIONS ====================
-        function updateSyncStatus(status, message = '') {
-            const icon = document.getElementById('syncIcon');
-            const text = document.getElementById('syncText');
-
-            switch (status) {
-                case 'syncing':
-                    icon.className = 'fas fa-sync-alt text-yellow-400 sync-indicator';
-                    text.textContent = 'Syncing...';
-                    text.className = 'text-yellow-300 hidden sm:inline';
-                    break;
-                case 'synced':
-                    icon.className = 'fas fa-cloud text-green-400';
-                    text.textContent = 'Synced';
-                    text.className = 'text-green-300 hidden sm:inline';
-                    break;
-                case 'offline':
-                    icon.className = 'fas fa-cloud-slash text-gray-400';
-                    text.textContent = 'Offline';
-                    text.className = 'text-gray-400 hidden sm:inline';
-                    break;
-                case 'error':
-                    icon.className = 'fas fa-exclamation-circle text-red-400';
-                    text.textContent = 'Sync Error';
-                    text.className = 'text-red-300 hidden sm:inline';
-                    break;
+        function setupOfflineDefaults() {
+            if (!localStorage.getItem('snquiz_license_keys')) {
+                localStorage.setItem('snquiz_license_keys', JSON.stringify(['SNQUIZ-2024-DEMO', 'SNQUIZ-FREE-TRIAL']));
+            }
+            if (!localStorage.getItem('snquiz_admin_password')) {
+                localStorage.setItem('snquiz_admin_password', 'admin123');
             }
         }
 
-        async function syncToCloud() {
-            if (!supabaseClient || !state.currentUser || state.isSyncing) return;
+        function updateLoadingStatus(msg) {
+            document.getElementById('loadingStatus').textContent = msg;
+        }
 
-            state.isSyncing = true;
-            updateSyncStatus('syncing');
-
+        async function loadQuestions() {
             try {
-                // Sync section progress
-                for (const [sectionId, progress] of Object.entries(state.sectionProgress)) {
-                    await supabaseClient.from('user_progress').upsert({
-                        license_key: state.currentUser,
-                        section_id: sectionId.toString(),
-                        score: progress.correct || 0,
-                        total_questions: progress.total || 0,
-                        percentage: progress.percentage || 0,
-                        last_attempt_at: new Date().toISOString()
-                    }, { onConflict: 'license_key,section_id' });
+                const response = await fetch('questions.json');
+                if (response.ok) {
+                    state.questions = await response.json();
+                } else {
+                    state.questions = generateSampleQuestions();
                 }
-
-                // Sync bookmarks
-                await supabaseClient.from('bookmarks').delete().eq('license_key', state.currentUser);
-                if (state.bookmarks.length > 0) {
-                    const bookmarkInserts = state.bookmarks.map(qId => ({
-                        license_key: state.currentUser,
-                        question_id: qId
-                    }));
-                    await supabaseClient.from('bookmarks').insert(bookmarkInserts);
-                }
-
-                // Sync wrong answers
-                await supabaseClient.from('wrong_answers').delete().eq('license_key', state.currentUser);
-                if (state.wrongAnswers.length > 0) {
-                    const wrongInserts = state.wrongAnswers.map(qId => ({
-                        license_key: state.currentUser,
-                        question_id: qId
-                    }));
-                    await supabaseClient.from('wrong_answers').insert(wrongInserts);
-                }
-
-                updateSyncStatus('synced');
-            } catch (error) {
-                console.error('Sync error:', error);
-                updateSyncStatus('error');
-            } finally {
-                state.isSyncing = false;
+            } catch (e) {
+                log('⚠️ questions.json not found, using samples');
+                state.questions = generateSampleQuestions();
             }
+            document.getElementById('totalQuestionsCount').textContent = state.questions.length;
         }
 
-        async function syncQuizSession() {
-            if (!supabaseClient || !state.currentUser || state.isStudyMode) return;
+        function generateSampleQuestions() {
+            const questions = [];
+            const topics = ['Service Catalog', 'CMDB', 'ITSM', 'Flow Designer', 'UI Policies', 'Business Rules'];
 
-            try {
-                const sessionData = {
-                    license_key: state.currentUser,
-                    section_id: state.currentSection.toString(),
-                    current_question_index: state.currentQuestionIndex,
-                    score: state.score,
-                    question_ids: state.currentQuizQuestions.map(q => q.id),
-                    answered_questions: state.answeredQuestions,
-                    time_remaining: state.timeRemaining,
-                    is_study_mode: state.isStudyMode,
-                    updated_at: new Date().toISOString()
-                };
+            for (let i = 1; i <= CONFIG.totalQuestions; i++) {
+                const topic = topics[i % topics.length];
+                const isMulti = i % 5 === 0;
 
-                await supabaseClient.from('quiz_sessions').upsert(sessionData, {
-                    onConflict: 'license_key,section_id'
+                questions.push({
+                    id: i,
+                    question: `Sample Question ${i}: Which describes ${topic} in ServiceNow?${isMulti ? ' (Choose two.)' : ''}`,
+                    options: {
+                        A: `${topic} Option A`,
+                        B: `${topic} Option B`,
+                        C: `${topic} Option C`,
+                        D: `${topic} Option D`
+                    },
+                    correct: isMulti ? ['A', 'C'] : [['A', 'B', 'C', 'D'][i % 4]],
+                    type: isMulti ? 'multi' : 'single'
                 });
-            } catch (error) {
-                console.error('Failed to sync quiz session:', error);
             }
+            return questions;
         }
 
-        async function loadFromCloud() {
-            if (!supabaseClient || !state.currentUser) return;
-
-            updateSyncStatus('syncing');
-
-            try {
-                // Load progress
-                const { data: progressData } = await supabaseClient
-                    .from('user_progress')
-                    .select('*')
-                    .eq('license_key', state.currentUser);
-
-                if (progressData) {
-                    state.sectionProgress = {};
-                    progressData.forEach(p => {
-                        state.sectionProgress[p.section_id] = {
-                            correct: p.score,
-                            total: p.total_questions,
-                            percentage: p.percentage,
-                            lastAttempt: p.last_attempt_at
-                        };
-                    });
-                }
-
-                // Load bookmarks
-                const { data: bookmarksData } = await supabase
-                    .from('bookmarks')
-                    .select('question_id')
-                    .eq('license_key', state.currentUser);
-
-                if (bookmarksData) {
-                    state.bookmarks = bookmarksData.map(b => b.question_id);
-                }
-
-                // Load wrong answers
-                const { data: wrongData } = await supabase
-                    .from('wrong_answers')
-                    .select('question_id')
-                    .eq('license_key', state.currentUser);
-
-                if (wrongData) {
-                    state.wrongAnswers = wrongData.map(w => w.question_id);
-                }
-
-                // Load active quiz session
-                const { data: sessionData } = await supabase
-                    .from('quiz_sessions')
-                    .select('*')
-                    .eq('license_key', state.currentUser)
-                    .order('updated_at', { ascending: false })
-                    .limit(1);
-
-                if (sessionData && sessionData.length > 0) {
-                    state.savedQuiz = {
-                        section: sessionData[0].section_id,
-                        questionIndex: sessionData[0].current_question_index,
-                        score: sessionData[0].score,
-                        questionsIds: sessionData[0].question_ids,
-                        answeredQuestions: sessionData[0].answered_questions || [],
-                        timeRemaining: sessionData[0].time_remaining
-                    };
-                }
-
-                // Also save to local storage as backup
-                saveToLocalStorage();
-
-                updateSyncStatus('synced');
-            } catch (error) {
-                console.error('Failed to load from cloud:', error);
-                updateSyncStatus('error');
-                // Fall back to local storage
-                loadFromLocalStorage();
-            }
-        }
-
-        async function clearCloudSession(sectionId) {
-            if (!supabase || !state.currentUser) return;
-
-            try {
-                await supabase
-                    .from('quiz_sessions')
-                    .delete()
-                    .eq('license_key', state.currentUser)
-                    .eq('section_id', sectionId.toString());
-            } catch (error) {
-                console.error('Failed to clear cloud session:', error);
-            }
-        }
-
-        // ==================== LOCAL STORAGE (BACKUP) ====================
+        // ==================== LOCAL STORAGE ====================
         function saveToLocalStorage() {
             localStorage.setItem('snquiz_progress', JSON.stringify(state.sectionProgress));
             localStorage.setItem('snquiz_bookmarks', JSON.stringify(state.bookmarks));
@@ -1030,302 +868,109 @@
         }
 
         function loadFromLocalStorage() {
-            const progress = localStorage.getItem('snquiz_progress');
-            if (progress) state.sectionProgress = JSON.parse(progress);
-
-            const bookmarks = localStorage.getItem('snquiz_bookmarks');
-            if (bookmarks) state.bookmarks = JSON.parse(bookmarks);
-
-            const wrong = localStorage.getItem('snquiz_wrong_answers');
-            if (wrong) state.wrongAnswers = JSON.parse(wrong);
-
-            const saved = localStorage.getItem('snquiz_saved_quiz');
-            if (saved) state.savedQuiz = JSON.parse(saved);
-        }
-
-        // ==================== INITIALIZATION ====================
-        async function init() {
-            debugLog('APP', '========================================');
-            debugLog('APP', '     SN QUIZ APP - INITIALIZATION      ');
-            debugLog('APP', '========================================');
-            debugLog('APP', 'Browser:', navigator.userAgent);
-            debugLog('APP', 'Online status:', navigator.onLine);
-            debugLog('APP', 'Current URL:', window.location.href);
-
             try {
-                debugLog('APP', 'Step 1: Loading questions...');
-                updateLoadingStatus('Loading questions...');
-                await loadQuestions();
-                debugSuccess('APP', `Questions loaded: ${state.questions.length} questions`);
+                const progress = localStorage.getItem('snquiz_progress');
+                if (progress) state.sectionProgress = JSON.parse(progress);
 
-                debugLog('APP', 'Step 2: Initializing Supabase...');
-                updateLoadingStatus('Checking connection...');
-                const cloudConnected = await initSupabase();
-                debugLog('APP', 'Cloud connected:', cloudConnected);
-                debugLog('APP', 'Offline mode:', isOfflineMode);
+                const bookmarks = localStorage.getItem('snquiz_bookmarks');
+                if (bookmarks) state.bookmarks = JSON.parse(bookmarks);
 
-                if (!cloudConnected || isOfflineMode) {
-                    debugLog('APP', 'Step 3: Setting up offline mode...');
-                    updateSyncStatus('offline');
-                    loadFromLocalStorage();
+                const wrong = localStorage.getItem('snquiz_wrong_answers');
+                if (wrong) state.wrongAnswers = JSON.parse(wrong);
 
-                    // Setup default license keys for offline mode
-                    if (!localStorage.getItem('snquiz_license_keys')) {
-                        debugLog('APP', 'Creating default license keys...');
-                        localStorage.setItem('snquiz_license_keys', JSON.stringify(['SNQUIZ-2024-DEMO', 'SNQUIZ-FREE-TRIAL']));
-                    }
-                    if (!localStorage.getItem('snquiz_admin_password')) {
-                        debugLog('APP', 'Setting default admin password...');
-                        localStorage.setItem('snquiz_admin_password', 'admin123');
-                    }
-                    debugSuccess('APP', 'Offline mode setup complete');
-                } else {
-                    debugSuccess('APP', 'Cloud mode active');
-                }
-
-                // Check for saved session
-                const savedUser = localStorage.getItem('snquiz_current_user');
-                debugLog('APP', 'Saved user session:', savedUser ? savedUser.substring(0, 10) + '...' : 'None');
-
-                if (savedUser) {
-                    state.currentUser = savedUser;
-                    if (cloudConnected && !isOfflineMode) {
-                        debugLog('APP', 'Step 4: Syncing progress from cloud...');
-                        updateLoadingStatus('Syncing your progress...');
-                        await loadFromCloud();
-                        debugSuccess('APP', 'Progress synced from cloud');
-                    }
-                }
-
-                // Setup online/offline listeners
-                window.addEventListener('online', () => {
-                    debugLog('NETWORK', 'Network status: ONLINE');
-                    isOnline = true;
-                    if (state.currentUser && !isOfflineMode) syncToCloud();
-                });
-
-                window.addEventListener('offline', () => {
-                    debugLog('NETWORK', 'Network status: OFFLINE');
-                    isOnline = false;
-                    updateSyncStatus('offline');
-                });
-
-                // Hide loading and show app
-                debugLog('APP', 'Step 5: Finishing initialization...');
-                finishLoading();
-                debugSuccess('APP', '========== APP READY ==========');
-
-            } catch (error) {
-                debugError('APP', 'Initialization error:', error);
-                debugLog('APP', 'Error stack:', error.stack);
-                updateLoadingStatus('Starting in offline mode...');
-                isOfflineMode = true;
-                updateSyncStatus('offline');
-                loadFromLocalStorage();
-
-                // Setup defaults
-                if (!localStorage.getItem('snquiz_license_keys')) {
-                    localStorage.setItem('snquiz_license_keys', JSON.stringify(['SNQUIZ-2024-DEMO', 'SNQUIZ-FREE-TRIAL']));
-                }
-                if (!localStorage.getItem('snquiz_admin_password')) {
-                    localStorage.setItem('snquiz_admin_password', 'admin123');
-                }
-
-                finishLoading();
-                debugLog('APP', 'App started in offline mode due to error');
+                const saved = localStorage.getItem('snquiz_saved_quiz');
+                if (saved) state.savedQuiz = JSON.parse(saved);
+            } catch (e) {
+                log('⚠️ Error loading from localStorage:', e);
             }
         }
 
-        function finishLoading() {
-            setTimeout(() => {
-                document.getElementById('loadingScreen').classList.add('hide');
-                document.getElementById('app').classList.remove('hide');
+        // ==================== SYNC STATUS ====================
+        function updateSyncStatus(status) {
+            const icon = document.getElementById('syncIcon');
+            const text = document.getElementById('syncText');
 
-                if (state.currentUser) {
-                    showDashboard();
-                } else {
-                    showLoginScreen();
-                }
-            }, 500);
-        }
-
-        function updateLoadingStatus(message) {
-            document.getElementById('loadingStatus').textContent = message;
-        }
-
-        async function loadQuestions() {
-            debugLog('QUESTIONS', 'Attempting to load questions.json...');
-            try {
-                const response = await fetch('questions.json');
-                debugLog('QUESTIONS', 'Fetch response status:', response.status);
-
-                if (response.ok) {
-                    state.questions = await response.json();
-                    debugSuccess('QUESTIONS', `Loaded ${state.questions.length} questions from questions.json`);
-
-                    // Validate questions format
-                    if (state.questions.length > 0) {
-                        const sample = state.questions[0];
-                        debugLog('QUESTIONS', 'Sample question format:', {
-                            id: sample.id,
-                            hasQuestion: !!sample.question,
-                            hasOptions: !!sample.options,
-                            hasCorrect: !!sample.correct,
-                            type: sample.type
-                        });
-                    }
-                } else {
-                    debugError('QUESTIONS', `Failed to load questions.json (HTTP ${response.status})`);
-                    debugLog('QUESTIONS', 'Falling back to sample questions...');
-                    state.questions = generateSampleQuestions();
-                }
-            } catch (error) {
-                debugError('QUESTIONS', 'Error loading questions:', error.message);
-                debugLog('QUESTIONS', 'Using generated sample questions...');
-                state.questions = generateSampleQuestions();
+            switch (status) {
+                case 'syncing':
+                    icon.className = 'fas fa-sync-alt text-yellow-400 sync-indicator';
+                    text.textContent = 'Syncing...';
+                    break;
+                case 'synced':
+                    icon.className = 'fas fa-cloud text-green-400';
+                    text.textContent = 'Synced';
+                    break;
+                case 'offline':
+                    icon.className = 'fas fa-hdd text-gray-400';
+                    text.textContent = 'Local';
+                    break;
+                case 'error':
+                    icon.className = 'fas fa-exclamation-circle text-red-400';
+                    text.textContent = 'Error';
+                    break;
             }
-
-            document.getElementById('totalQuestionsCount').textContent = state.questions.length;
-            debugLog('QUESTIONS', 'Total questions available:', state.questions.length);
-        }
-
-        function generateSampleQuestions() {
-            debugLog('QUESTIONS', 'Generating sample questions (fallback mode)...');
-            const sampleQuestions = [];
-            const topics = [
-                'Service Catalog', 'CMDB', 'ITSM', 'Flow Designer', 'UI Policies',
-                'Business Rules', 'Client Scripts', 'ACLs', 'Workflows', 'Reporting',
-                'Service Portal', 'Knowledge Management', 'Incident Management',
-                'Change Management', 'Problem Management', 'Asset Management'
-            ];
-
-            // Generate 204 questions (matching the actual questions.json count)
-            for (let i = 1; i <= CONFIG.totalQuestions; i++) {
-                const topic = topics[i % topics.length];
-                const isMulti = i % 5 === 0;
-
-                let correct, questionText;
-                if (isMulti) {
-                    const shuffled = ['A', 'B', 'C', 'D'].sort(() => Math.random() - 0.5);
-                    correct = shuffled.slice(0, 2).sort();
-                    questionText = `Sample Question ${i}: Which of the following are valid ${topic} features in ServiceNow? (Choose two.)`;
-                } else {
-                    correct = [['A', 'B', 'C', 'D'][i % 4]];
-                    questionText = `Sample Question ${i}: Which of the following best describes the ${topic} functionality in ServiceNow?`;
-                }
-
-                sampleQuestions.push({
-                    id: i,
-                    question: questionText,
-                    options: {
-                        A: `${topic} Option A - This is the first possible answer`,
-                        B: `${topic} Option B - This is the second possible answer`,
-                        C: `${topic} Option C - This is the third possible answer`,
-                        D: `${topic} Option D - This is the fourth possible answer`
-                    },
-                    correct: correct,
-                    type: isMulti ? 'multi' : 'single'
-                });
-            }
-
-            debugLog('QUESTIONS', `Generated ${sampleQuestions.length} sample questions`);
-            return sampleQuestions;
         }
 
         // ==================== AUTHENTICATION ====================
         async function validateLicense() {
-            debugLog('AUTH', '========== LICENSE VALIDATION ==========');
             const input = document.getElementById('licenseKeyInput');
             const error = document.getElementById('loginError');
             const loginBtn = document.getElementById('loginBtn');
             const licenseKey = input.value.trim();
 
-            debugLog('AUTH', 'License key entered:', licenseKey ? licenseKey.substring(0, 10) + '...' : 'EMPTY');
-
             if (!licenseKey) {
-                debugLog('AUTH', 'No license key provided');
                 showError(error, 'Please enter a license key');
                 input.classList.add('shake');
                 setTimeout(() => input.classList.remove('shake'), 500);
                 return;
             }
 
-            // Show loading state
             loginBtn.disabled = true;
             loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Validating...';
 
             let isValid = false;
 
-            // Try cloud validation first (if configured)
-            debugLog('AUTH', 'Supabase available:', !!supabase);
-            debugLog('AUTH', 'Offline mode:', isOfflineMode);
-
-            if (supabase && !isOfflineMode) {
-                debugLog('AUTH', 'Attempting cloud validation...');
+            // Try cloud validation
+            if (supabaseClient && !isOfflineMode) {
                 try {
-                    const { data, error: queryError } = await supabase
+                    const { data, error: queryError } = await supabaseClient
                         .from('license_keys')
                         .select('*')
                         .eq('license_key', licenseKey)
                         .eq('is_active', true)
                         .single();
 
-                    debugLog('AUTH', 'Cloud query result:', { data, error: queryError });
-
                     if (data && !queryError) {
-                        // Check expiry
                         if (data.expires_at && new Date(data.expires_at) < new Date()) {
-                            debugLog('AUTH', 'License key expired:', data.expires_at);
                             showError(error, 'This license key has expired.');
                             loginBtn.disabled = false;
                             loginBtn.innerHTML = '<i class="fas fa-unlock"></i> Access Quiz';
                             return;
-                        } else {
-                            debugSuccess('AUTH', 'License validated via cloud');
-                            isValid = true;
                         }
-                    } else {
-                        debugLog('AUTH', 'License not found in cloud database');
+                        isValid = true;
+                        log('✅ License validated via cloud');
                     }
                 } catch (e) {
-                    debugError('AUTH', 'License validation error:', e);
+                    log('⚠️ Cloud validation failed:', e.message);
                 }
             }
 
-            // Fallback to local validation (offline mode or cloud failed)
+            // Fallback to local validation
             if (!isValid) {
-                debugLog('AUTH', 'Attempting local validation...');
-                const localKeys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '["SNQUIZ-2024-DEMO", "SNQUIZ-FREE-TRIAL"]');
-                debugLog('AUTH', 'Local keys available:', localKeys);
+                const localKeys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
                 isValid = localKeys.includes(licenseKey);
-                debugLog('AUTH', 'Local validation result:', isValid);
+                if (isValid) log('✅ License validated locally');
             }
 
             loginBtn.disabled = false;
             loginBtn.innerHTML = '<i class="fas fa-unlock"></i> Access Quiz';
 
             if (isValid) {
-                debugSuccess('AUTH', 'License key accepted!');
                 state.currentUser = licenseKey;
                 localStorage.setItem('snquiz_current_user', licenseKey);
-
-                // Load user's data from cloud if available
-                if (supabase && !isOfflineMode) {
-                    debugLog('AUTH', 'Loading progress from cloud...');
-                    await loadFromCloud();
-                } else {
-                    debugLog('AUTH', 'Loading progress from local storage...');
-                    loadFromLocalStorage();
-                }
-
-                if (isOfflineMode) {
-                    showToast('Welcome! Running in offline mode.', 'success');
-                } else {
-                    showToast('Welcome! Your progress syncs across devices.', 'success');
-                }
+                loadFromLocalStorage();
+                showToast('Welcome!', 'success');
                 showDashboard();
             } else {
-                debugError('AUTH', 'Invalid license key');
                 showError(error, 'Invalid license key. Please try again.');
                 input.classList.add('shake');
                 setTimeout(() => input.classList.remove('shake'), 500);
@@ -1349,10 +994,10 @@
 
             let isValid = false;
 
-            // Try cloud validation first
-            if (supabase && !isOfflineMode) {
+            // Try cloud validation
+            if (supabaseClient && !isOfflineMode) {
                 try {
-                    const { data } = await supabase
+                    const { data } = await supabaseClient
                         .from('admin_settings')
                         .select('setting_value')
                         .eq('setting_key', 'admin_password')
@@ -1362,16 +1007,14 @@
                         isValid = true;
                     }
                 } catch (e) {
-                    console.error('Admin validation error:', e);
+                    log('⚠️ Cloud admin validation failed');
                 }
             }
 
-            // Fallback to local validation
+            // Local fallback
             if (!isValid) {
-                const localAdminPass = localStorage.getItem('snquiz_admin_password') || 'admin123';
-                if (password === localAdminPass) {
-                    isValid = true;
-                }
+                const localPass = localStorage.getItem('snquiz_admin_password') || 'admin123';
+                isValid = password === localPass;
             }
 
             if (isValid) {
@@ -1400,11 +1043,9 @@
 
         // ==================== SCREEN NAVIGATION ====================
         function hideAllScreens() {
-            document.getElementById('loginScreen').classList.add('hide');
-            document.getElementById('adminPanel').classList.add('hide');
-            document.getElementById('dashboard').classList.add('hide');
-            document.getElementById('quizScreen').classList.add('hide');
-            document.getElementById('resultsScreen').classList.add('hide');
+            ['loginScreen', 'adminPanel', 'dashboard', 'quizScreen', 'resultsScreen'].forEach(id => {
+                document.getElementById(id).classList.add('hide');
+            });
         }
 
         function showLoginScreen() {
@@ -1450,71 +1091,35 @@
         async function updateAdminPanel() {
             let keys = [];
 
-            // Try cloud first, fall back to local
-            if (supabase && !isOfflineMode) {
+            if (supabaseClient && !isOfflineMode) {
                 try {
-                    const { data } = await supabase.from('license_keys').select('*').order('created_at', { ascending: false });
+                    const { data } = await supabaseClient.from('license_keys').select('*').order('created_at', { ascending: false });
                     if (data) keys = data;
                 } catch (e) {
-                    console.error('Failed to load keys from cloud:', e);
+                    log('⚠️ Failed to load keys from cloud');
                 }
             }
 
-            // Fallback to local keys
-            if (keys.length === 0 || isOfflineMode) {
+            if (keys.length === 0) {
                 const localKeys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
-                keys = localKeys.map((key, index) => ({
-                    id: index,
-                    license_key: key,
-                    is_active: true,
-                    created_at: new Date().toISOString()
-                }));
+                keys = localKeys.map((key, i) => ({ id: i, license_key: key, is_active: true }));
             }
 
-            const listContainer = document.getElementById('licenseKeysList');
-
-            if (isOfflineMode) {
-                // Offline mode - simpler UI
-                listContainer.innerHTML = keys.map((key, index) => `
-                    <div class="flex items-center justify-between bg-white/5 rounded-xl p-3">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-key text-yellow-400"></i>
-                            <code class="text-sm">${key.license_key}</code>
-                        </div>
-                        <button onclick="deleteLicenseKeyLocal(${index})" class="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition">
-                            <i class="fas fa-trash"></i>
-                        </button>
+            const list = document.getElementById('licenseKeysList');
+            list.innerHTML = keys.map((key, index) => `
+                <div class="flex items-center justify-between bg-white/5 rounded-xl p-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-key text-yellow-400"></i>
+                        <code class="text-sm">${key.license_key}</code>
                     </div>
-                `).join('');
-            } else {
-                listContainer.innerHTML = keys.map((key) => `
-                    <div class="flex items-center justify-between bg-white/5 rounded-xl p-3">
-                        <div class="flex items-center gap-3 flex-1">
-                            <i class="fas fa-key ${key.is_active ? 'text-yellow-400' : 'text-gray-500'}"></i>
-                            <div class="flex-1">
-                                <code class="text-sm">${key.license_key}</code>
-                                <div class="text-xs text-gray-500">
-                                    ${key.is_active ? '<span class="text-green-400">Active</span>' : '<span class="text-red-400">Inactive</span>'}
-                                    ${key.expires_at ? ` • Expires: ${new Date(key.expires_at).toLocaleDateString()}` : ''}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="toggleKeyStatus('${key.id}', ${!key.is_active})" 
-                                class="p-2 ${key.is_active ? 'text-yellow-400 hover:bg-yellow-500/20' : 'text-green-400 hover:bg-green-500/20'} rounded-lg transition">
-                                <i class="fas ${key.is_active ? 'fa-pause' : 'fa-play'}"></i>
-                            </button>
-                            <button onclick="deleteLicenseKey('${key.id}')" class="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
+                    <button onclick="deleteLicenseKeyLocal(${index})" class="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
 
-            const activeCount = keys.filter(k => k.is_active !== false).length;
             document.getElementById('totalKeysCount').textContent = keys.length;
-            document.getElementById('activeKeysCount').textContent = activeCount;
+            document.getElementById('activeKeysCount').textContent = keys.filter(k => k.is_active !== false).length;
         }
 
         function deleteLicenseKeyLocal(index) {
@@ -1534,70 +1139,28 @@
                 return;
             }
 
-            // Cloud mode
-            if (supabase && !isOfflineMode) {
-                try {
-                    const { error } = await supabase.from('license_keys').insert({
-                        license_key: key,
-                        is_active: true
-                    });
+            const keys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
 
-                    if (error) {
-                        if (error.code === '23505') {
-                            showToast('This license key already exists', 'error');
-                        } else {
-                            showToast('Failed to add key: ' + error.message, 'error');
-                        }
-                        return;
-                    }
-
-                    input.value = '';
-                    updateAdminPanel();
-                    showToast('License key added successfully', 'success');
-                } catch (e) {
-                    showToast('Failed to add license key', 'error');
-                }
-            } else {
-                // Offline mode - save to localStorage
-                const keys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
-
-                if (keys.includes(key)) {
-                    showToast('This license key already exists', 'error');
-                    return;
-                }
-
-                keys.push(key);
-                localStorage.setItem('snquiz_license_keys', JSON.stringify(keys));
-                input.value = '';
-                updateAdminPanel();
-                showToast('License key added successfully', 'success');
+            if (keys.includes(key)) {
+                showToast('This license key already exists', 'error');
+                return;
             }
-        }
 
-        async function deleteLicenseKey(id) {
-            if (!confirm('Are you sure you want to delete this license key?')) return;
+            keys.push(key);
+            localStorage.setItem('snquiz_license_keys', JSON.stringify(keys));
 
-            if (supabase) {
+            // Also try to add to cloud
+            if (supabaseClient && !isOfflineMode) {
                 try {
-                    await supabase.from('license_keys').delete().eq('id', id);
-                    updateAdminPanel();
-                    showToast('License key deleted', 'success');
+                    await supabaseClient.from('license_keys').insert({ license_key: key, is_active: true });
                 } catch (e) {
-                    showToast('Failed to delete key', 'error');
+                    log('⚠️ Failed to add key to cloud');
                 }
             }
-        }
 
-        async function toggleKeyStatus(id, newStatus) {
-            if (supabase) {
-                try {
-                    await supabase.from('license_keys').update({ is_active: newStatus }).eq('id', id);
-                    updateAdminPanel();
-                    showToast(`License key ${newStatus ? 'activated' : 'deactivated'}`, 'success');
-                } catch (e) {
-                    showToast('Failed to update key', 'error');
-                }
-            }
+            input.value = '';
+            updateAdminPanel();
+            showToast('License key added successfully', 'success');
         }
 
         function generateRandomKey() {
@@ -1612,23 +1175,8 @@
             document.getElementById('newLicenseKey').value = key;
         }
 
-        async function exportLicenseKeys() {
-            let keys = [];
-
-            if (supabase && !isOfflineMode) {
-                try {
-                    const { data } = await supabase.from('license_keys').select('license_key, is_active, created_at, expires_at');
-                    keys = data || [];
-                } catch (e) {
-                    showToast('Failed to export keys from cloud', 'error');
-                    return;
-                }
-            } else {
-                // Offline mode
-                const localKeys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
-                keys = localKeys.map(k => ({ license_key: k, is_active: true }));
-            }
-
+        function exportLicenseKeys() {
+            const keys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
             const blob = new Blob([JSON.stringify(keys, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1639,53 +1187,25 @@
             showToast('License keys exported', 'success');
         }
 
-        async function changeAdminPassword() {
+        function changeAdminPassword() {
             const current = document.getElementById('currentAdminPass').value;
             const newPass = document.getElementById('newAdminPass').value;
+            const storedPass = localStorage.getItem('snquiz_admin_password') || 'admin123';
+
+            if (current !== storedPass) {
+                showToast('Current password is incorrect', 'error');
+                return;
+            }
 
             if (newPass.length < 6) {
                 showToast('New password must be at least 6 characters', 'error');
                 return;
             }
 
-            // Cloud mode
-            if (supabase && !isOfflineMode) {
-                try {
-                    const { data } = await supabase
-                        .from('admin_settings')
-                        .select('setting_value')
-                        .eq('setting_key', 'admin_password')
-                        .single();
-
-                    if (data && data.setting_value === current) {
-                        await supabase
-                            .from('admin_settings')
-                            .update({ setting_value: newPass, updated_at: new Date().toISOString() })
-                            .eq('setting_key', 'admin_password');
-
-                        document.getElementById('currentAdminPass').value = '';
-                        document.getElementById('newAdminPass').value = '';
-                        showToast('Admin password changed successfully', 'success');
-                    } else {
-                        showToast('Current password is incorrect', 'error');
-                    }
-                } catch (e) {
-                    showToast('Failed to change password', 'error');
-                }
-            } else {
-                // Offline mode
-                const storedPass = localStorage.getItem('snquiz_admin_password') || 'admin123';
-
-                if (current !== storedPass) {
-                    showToast('Current password is incorrect', 'error');
-                    return;
-                }
-
-                localStorage.setItem('snquiz_admin_password', newPass);
-                document.getElementById('currentAdminPass').value = '';
-                document.getElementById('newAdminPass').value = '';
-                showToast('Admin password changed successfully', 'success');
-            }
+            localStorage.setItem('snquiz_admin_password', newPass);
+            document.getElementById('currentAdminPass').value = '';
+            document.getElementById('newAdminPass').value = '';
+            showToast('Admin password changed successfully', 'success');
         }
 
         // ==================== DASHBOARD ====================
@@ -1709,30 +1229,22 @@
                         </div>
                         <div class="mb-2">
                             <div class="flex justify-between text-sm mb-1">
-                                <span>${progress.correct}/${totalQuestions} completed</span>
+                                <span>${progress.correct}/${totalQuestions}</span>
                                 <span class="text-purple-400">${progress.percentage}%</span>
                             </div>
                             <div class="bg-white/10 rounded-full h-2 overflow-hidden">
-                                <div class="h-full gradient-bg transition-all duration-500" style="width: ${progress.percentage}%"></div>
+                                <div class="h-full gradient-bg" style="width: ${progress.percentage}%"></div>
                             </div>
-                        </div>
-                        <div class="flex items-center justify-between text-xs text-gray-400">
-                            <span><i class="fas fa-clock mr-1"></i>90s/question</span>
-                            <span><i class="fas fa-star mr-1"></i>${progress.correct} pts</span>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            // Update final exam score
             const finalProgress = state.sectionProgress['final'] || { percentage: 0 };
             document.getElementById('finalExamScore').textContent = finalProgress.percentage + '%';
-
-            // Update bookmark and wrong counts
             document.getElementById('bookmarkCount').textContent = state.bookmarks.length + ' saved questions';
             document.getElementById('wrongCount').textContent = state.wrongAnswers.length + ' to review';
 
-            // Show resume banner
             const resumeBanner = document.getElementById('resumeBanner');
             if (state.savedQuiz) {
                 resumeBanner.classList.remove('hide');
@@ -1749,13 +1261,13 @@
         }
 
         // ==================== QUIZ LOGIC ====================
-        async function startQuiz(sectionId) {
+        function startQuiz(sectionId) {
             if (state.savedQuiz && state.savedQuiz.section == sectionId) {
                 if (confirm('You have a saved quiz. Resume it?\n\nOK = Resume, Cancel = Start New')) {
                     resumeQuiz();
                     return;
                 } else {
-                    await clearSavedQuiz();
+                    clearSavedQuiz();
                 }
             }
 
@@ -1782,18 +1294,17 @@
             document.getElementById('quizScreen').classList.remove('hide');
             document.getElementById('logoutBtn').classList.add('hide');
 
-            syncQuizSession();
+            saveQuizState();
             loadQuestion();
         }
 
-        async function resumeQuiz() {
+        function resumeQuiz() {
             if (!state.savedQuiz) {
                 showToast('No saved quiz found', 'error');
                 return;
             }
 
             const saved = state.savedQuiz;
-
             state.currentSection = saved.section;
             state.currentQuestionIndex = saved.questionIndex;
             state.score = saved.score;
@@ -1821,13 +1332,24 @@
             loadQuestion();
         }
 
-        async function clearSavedQuiz() {
-            if (state.savedQuiz) {
-                await clearCloudSession(state.savedQuiz.section);
-            }
+        function clearSavedQuiz() {
             localStorage.removeItem('snquiz_saved_quiz');
             state.savedQuiz = null;
             document.getElementById('resumeBanner').classList.add('hide');
+        }
+
+        function saveQuizState() {
+            if (state.isStudyMode) return;
+
+            state.savedQuiz = {
+                section: state.currentSection,
+                questionIndex: state.currentQuestionIndex,
+                score: state.score,
+                questionsIds: state.currentQuizQuestions.map(q => q.id),
+                answeredQuestions: state.answeredQuestions,
+                timeRemaining: state.timeRemaining
+            };
+            localStorage.setItem('snquiz_saved_quiz', JSON.stringify(state.savedQuiz));
         }
 
         function loadQuestion() {
@@ -1840,26 +1362,26 @@
             document.getElementById('currentScore').textContent = state.score;
             document.getElementById('quizProgressBar').style.width = ((state.currentQuestionIndex / total) * 100) + '%';
 
-            const questionTypeBadge = document.getElementById('questionType');
+            const badge = document.getElementById('questionType');
             if (isMulti) {
-                questionTypeBadge.textContent = `Multiple Choice (Select ${question.correct.length})`;
-                questionTypeBadge.className = 'px-3 py-1 bg-orange-500/30 text-orange-300 rounded-full text-sm';
+                badge.textContent = `Multiple Choice (Select ${question.correct.length})`;
+                badge.className = 'px-3 py-1 bg-orange-500/30 text-orange-300 rounded-full text-sm';
             } else {
-                questionTypeBadge.textContent = 'Single Choice';
-                questionTypeBadge.className = 'px-3 py-1 bg-purple-500/30 text-purple-300 rounded-full text-sm';
+                badge.textContent = 'Single Choice';
+                badge.className = 'px-3 py-1 bg-purple-500/30 text-purple-300 rounded-full text-sm';
             }
 
             const isBookmarked = state.bookmarks.includes(question.id);
             document.getElementById('bookmarkIcon').className = isBookmarked ? 'fas fa-bookmark text-yellow-400' : 'far fa-bookmark';
 
-            const optionsContainer = document.getElementById('optionsContainer');
-            optionsContainer.innerHTML = Object.entries(question.options).map(([key, value]) => `
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = Object.entries(question.options).map(([key, value]) => `
                 <button onclick="selectOption('${key}')" id="option-${key}"
-                    class="w-full text-left p-4 bg-white/5 border-2 border-white/10 rounded-xl hover:bg-white/15 hover:border-purple-400/50 transition-all duration-200 ease-out flex items-start gap-3 group">
-                    <span class="w-8 h-8 ${isMulti ? 'rounded-md' : 'rounded-full'} border-2 border-purple-400/50 flex items-center justify-center shrink-0 transition-all duration-200 group-hover:border-purple-400" id="indicator-${key}">
+                    class="w-full text-left p-4 bg-white/5 border-2 border-white/10 rounded-xl hover:bg-white/15 hover:border-purple-400/50 transition-all duration-200 flex items-start gap-3 group">
+                    <span class="w-8 h-8 ${isMulti ? 'rounded-md' : 'rounded-full'} border-2 border-purple-400/50 flex items-center justify-center shrink-0" id="indicator-${key}">
                         ${isMulti
-                    ? `<i class="fas fa-check text-sm text-transparent transition-all duration-200" id="check-${key}"></i>`
-                    : `<span class="w-3 h-3 rounded-full bg-transparent scale-0 transition-all duration-200" id="radio-${key}"></span>`
+                    ? `<i class="fas fa-check text-sm text-transparent" id="check-${key}"></i>`
+                    : `<span class="w-3 h-3 rounded-full bg-transparent scale-0" id="radio-${key}"></span>`
                 }
                     </span>
                     <span class="w-8 h-8 bg-purple-500/30 rounded-lg flex items-center justify-center font-bold text-sm shrink-0">${key}</span>
@@ -1868,18 +1390,17 @@
             `).join('');
 
             if (isMulti) {
-                optionsContainer.innerHTML = `
+                container.innerHTML = `
                     <div class="flex items-center gap-2 mb-3 p-3 bg-orange-500/10 border border-orange-500/30 rounded-xl">
                         <i class="fas fa-info-circle text-orange-400"></i>
                         <span class="text-sm text-orange-300">Select all correct answers (${question.correct.length} required)</span>
                     </div>
-                ` + optionsContainer.innerHTML;
+                ` + container.innerHTML;
             }
 
             state.selectedAnswers = [];
             state.hasAnswered = false;
             document.getElementById('submitBtn').classList.remove('hide');
-            document.getElementById('submitBtn').disabled = false;
             document.getElementById('nextBtn').classList.add('hide');
             document.getElementById('prevBtn').classList.add('hide');
             document.getElementById('feedbackContainer').classList.add('hide');
@@ -1904,17 +1425,14 @@
                     optionBtn.classList.remove('option-selected-multi', 'scale-[1.02]');
                     optionBtn.classList.add('bg-white/5', 'border-white/10');
                     indicator.classList.remove('bg-orange-500', 'border-orange-400');
-                    indicator.classList.add('border-purple-400/50');
-                    checkIcon.classList.remove('text-white');
                     checkIcon.classList.add('text-transparent');
                 } else {
                     state.selectedAnswers.push(option);
                     optionBtn.classList.add('option-selected-multi', 'scale-[1.02]');
                     optionBtn.classList.remove('bg-white/5', 'border-white/10');
                     indicator.classList.add('bg-orange-500', 'border-orange-400');
-                    indicator.classList.remove('border-purple-400/50');
-                    checkIcon.classList.add('text-white');
                     checkIcon.classList.remove('text-transparent');
+                    checkIcon.classList.add('text-white');
                 }
 
                 updateSelectionCount(question);
@@ -1926,10 +1444,8 @@
 
                     btn.classList.remove('option-selected-single', 'scale-[1.02]');
                     btn.classList.add('bg-white/5', 'border-white/10');
-                    indicator.classList.remove('border-violet-400', 'bg-violet-500');
-                    indicator.classList.add('border-purple-400/50');
-                    radio.classList.remove('bg-white', 'scale-100');
-                    radio.classList.add('bg-transparent', 'scale-0');
+                    indicator.classList.remove('bg-violet-500', 'border-violet-400');
+                    radio.classList.add('scale-0', 'bg-transparent');
                 });
 
                 state.selectedAnswers = [option];
@@ -1938,10 +1454,9 @@
 
                 optionBtn.classList.add('option-selected-single', 'scale-[1.02]');
                 optionBtn.classList.remove('bg-white/5', 'border-white/10');
-                indicator.classList.add('border-violet-400', 'bg-violet-500');
-                indicator.classList.remove('border-purple-400/50');
-                radio.classList.add('bg-white', 'scale-100');
-                radio.classList.remove('bg-transparent', 'scale-0');
+                indicator.classList.add('bg-violet-500', 'border-violet-400');
+                radio.classList.remove('scale-0', 'bg-transparent');
+                radio.classList.add('scale-100', 'bg-white');
             }
         }
 
@@ -1952,21 +1467,16 @@
                 const required = question.correct.length;
                 const remaining = required - selected;
 
-                let message = '';
-                let colorClass = '';
-
+                let message, colorClass;
                 if (selected === 0) {
                     message = `Select all correct answers (${required} required)`;
                     colorClass = 'text-orange-300';
                 } else if (remaining > 0) {
                     message = `${selected} selected, ${remaining} more needed`;
                     colorClass = 'text-orange-300';
-                } else if (remaining === 0) {
+                } else {
                     message = `${selected} selected - Ready to submit!`;
                     colorClass = 'text-green-300';
-                } else {
-                    message = `${selected} selected (${required} expected)`;
-                    colorClass = 'text-yellow-300';
                 }
 
                 infoBox.innerHTML = `
@@ -1984,14 +1494,13 @@
             processAnswer();
         }
 
-        async function processAnswer() {
+        function processAnswer() {
             if (state.hasAnswered) return;
 
             state.hasAnswered = true;
             clearInterval(state.timer);
 
             const question = state.currentQuizQuestions[state.currentQuestionIndex];
-            const isMulti = question.type === 'multi';
             const isCorrect = arraysEqual(state.selectedAnswers.sort(), question.correct.sort());
 
             if (isCorrect) {
@@ -2004,6 +1513,21 @@
             }
 
             showFeedback(isCorrect, question);
+            highlightAnswers(question);
+
+            document.getElementById('submitBtn').classList.add('hide');
+            document.getElementById('nextBtn').classList.remove('hide');
+
+            if (state.isStudyMode && state.currentQuestionIndex > 0) {
+                document.getElementById('prevBtn').classList.remove('hide');
+            }
+
+            saveQuizState();
+            saveToLocalStorage();
+        }
+
+        function highlightAnswers(question) {
+            const isMulti = question.type === 'multi';
 
             Object.keys(question.options).forEach(key => {
                 const optionBtn = document.getElementById(`option-${key}`);
@@ -2018,21 +1542,19 @@
                 if (isCorrectOption) {
                     optionBtn.classList.add('border-green-400', 'bg-green-500/30', 'correct-glow');
                     optionBtn.classList.remove('border-white/10', 'bg-white/5');
-                    indicator.classList.remove('border-purple-400/50', 'border-violet-400', 'bg-violet-500', 'border-orange-400', 'bg-orange-500');
                     indicator.classList.add('border-green-400', 'bg-green-500');
 
                     if (isMulti) {
-                        document.getElementById(`check-${key}`).classList.add('text-white');
-                        document.getElementById(`check-${key}`).classList.remove('text-transparent');
+                        const check = document.getElementById(`check-${key}`);
+                        check.classList.add('text-white');
+                        check.classList.remove('text-transparent');
                     } else {
                         const radio = document.getElementById(`radio-${key}`);
                         radio.classList.add('bg-white', 'scale-100');
-                        radio.classList.remove('bg-transparent', 'scale-0');
                     }
                 } else if (wasSelected) {
                     optionBtn.classList.add('border-red-400', 'bg-red-500/30', 'incorrect-glow');
                     optionBtn.classList.remove('border-white/10', 'bg-white/5');
-                    indicator.classList.remove('border-purple-400/50', 'border-violet-400', 'bg-violet-500', 'border-orange-400', 'bg-orange-500');
                     indicator.classList.add('border-red-400', 'bg-red-500');
 
                     if (isMulti) {
@@ -2040,35 +1562,9 @@
                     } else {
                         const radio = document.getElementById(`radio-${key}`);
                         radio.classList.add('bg-white', 'scale-100');
-                        radio.classList.remove('bg-transparent', 'scale-0');
                     }
                 }
             });
-
-            if (isMulti) {
-                const infoBox = document.querySelector('#optionsContainer > div:first-child');
-                if (infoBox) {
-                    if (isCorrect) {
-                        infoBox.innerHTML = `<i class="fas fa-check-circle text-green-400"></i><span class="text-sm text-green-300">All correct answers selected!</span>`;
-                        infoBox.className = 'flex items-center gap-2 mb-3 p-3 bg-green-500/10 border border-green-500/30 rounded-xl';
-                    } else {
-                        const correctCount = state.selectedAnswers.filter(a => question.correct.includes(a)).length;
-                        infoBox.innerHTML = `<i class="fas fa-times-circle text-red-400"></i><span class="text-sm text-red-300">You got ${correctCount} of ${question.correct.length} correct</span>`;
-                        infoBox.className = 'flex items-center gap-2 mb-3 p-3 bg-red-500/10 border border-red-500/30 rounded-xl';
-                    }
-                }
-            }
-
-            document.getElementById('submitBtn').classList.add('hide');
-            document.getElementById('nextBtn').classList.remove('hide');
-
-            if (state.isStudyMode && state.currentQuestionIndex > 0) {
-                document.getElementById('prevBtn').classList.remove('hide');
-            }
-
-            // Sync to cloud
-            syncQuizSession();
-            syncToCloud();
         }
 
         function showFeedback(isCorrect, question) {
@@ -2107,16 +1603,14 @@
                     </div>
                     <div>
                         <h3 class="font-bold text-lg">${isCorrect ? 'Correct!' : 'Incorrect'}</h3>
-                        <p class="text-sm text-gray-400">${isCorrect ?
-                    (isMulti ? `Great job! You selected all ${question.correct.length} correct answers.` : 'Great job!') :
-                    (isMulti ? `The correct answers are: ${question.correct.join(', ')}` : `The correct answer is: ${question.correct[0]}`)
-                }</p>
+                        <p class="text-sm text-gray-400">${isCorrect ? 'Great job!' :
+                    `The correct answer${question.correct.length > 1 ? 's are' : ' is'}: ${question.correct.join(', ')}`}</p>
                     </div>
                 </div>
                 ${partialInfo}
                 ${!isCorrect ? `
                     <div class="bg-white/5 rounded-xl p-4">
-                        <p class="text-sm text-gray-300 mb-2"><strong class="flex items-center gap-2 mb-2"><i class="fas ${isMulti ? 'fa-check-square' : 'fa-check-circle'} text-green-400"></i>Correct Answer${question.correct.length > 1 ? 's' : ''}:</strong></p>
+                        <p class="text-sm font-semibold mb-2 text-green-400">Correct Answer${question.correct.length > 1 ? 's' : ''}:</p>
                         <div class="space-y-2">
                             ${question.correct.map(c => `
                                 <div class="flex items-start gap-2 p-2 bg-green-500/10 rounded-lg">
@@ -2132,7 +1626,7 @@
             container.classList.remove('hide');
         }
 
-        async function nextQuestion() {
+        function nextQuestion() {
             const currentQuestion = state.currentQuizQuestions[state.currentQuestionIndex];
             if (!state.answeredQuestions.includes(currentQuestion.id)) {
                 state.answeredQuestions.push(currentQuestion.id);
@@ -2141,10 +1635,10 @@
             state.currentQuestionIndex++;
 
             if (state.currentQuestionIndex >= state.currentQuizQuestions.length) {
-                await clearSavedQuiz();
+                clearSavedQuiz();
                 endQuiz();
             } else {
-                syncQuizSession();
+                saveQuizState();
                 loadQuestion();
             }
         }
@@ -2156,7 +1650,7 @@
             }
         }
 
-        async function endQuiz() {
+        function endQuiz() {
             clearInterval(state.timer);
 
             const sectionKey = state.currentSection;
@@ -2173,10 +1667,7 @@
                 };
             }
 
-            // Sync progress to cloud
-            await syncToCloud();
             saveToLocalStorage();
-
             showResults();
         }
 
@@ -2185,10 +1676,10 @@
             document.getElementById('resultsScreen').classList.remove('hide');
             document.getElementById('logoutBtn').classList.remove('hide');
 
-            const totalQuestions = state.currentQuizQuestions.length;
+            const total = state.currentQuizQuestions.length;
             const correct = state.score;
-            const incorrect = totalQuestions - correct;
-            const percentage = Math.round((correct / totalQuestions) * 100);
+            const incorrect = total - correct;
+            const percentage = Math.round((correct / total) * 100);
 
             document.getElementById('resultsCorrect').textContent = correct;
             document.getElementById('resultsIncorrect').textContent = incorrect;
@@ -2245,25 +1736,12 @@
             document.getElementById('resetModal').classList.add('hide');
         }
 
-        async function resetAllProgress() {
+        function resetAllProgress() {
             state.sectionProgress = {};
             state.bookmarks = [];
             state.wrongAnswers = [];
             state.savedQuiz = null;
 
-            // Clear from cloud
-            if (supabase && state.currentUser) {
-                try {
-                    await supabase.from('user_progress').delete().eq('license_key', state.currentUser);
-                    await supabase.from('bookmarks').delete().eq('license_key', state.currentUser);
-                    await supabase.from('wrong_answers').delete().eq('license_key', state.currentUser);
-                    await supabase.from('quiz_sessions').delete().eq('license_key', state.currentUser);
-                } catch (e) {
-                    console.error('Failed to clear cloud data:', e);
-                }
-            }
-
-            // Clear local
             localStorage.removeItem('snquiz_progress');
             localStorage.removeItem('snquiz_bookmarks');
             localStorage.removeItem('snquiz_wrong_answers');
@@ -2277,7 +1755,7 @@
         function exitQuiz() {
             if (confirm('Exit quiz? Your progress will be saved.')) {
                 clearInterval(state.timer);
-                syncQuizSession();
+                saveQuizState();
                 showDashboard();
             }
         }
@@ -2314,13 +1792,12 @@
         function updateTimerDisplay() {
             const display = document.getElementById('timerDisplay');
             const circle = document.getElementById('timerCircle');
-
             const timeLimit = state.currentSection === 'final' ? CONFIG.finalExamTimeLimit : CONFIG.questionTimeLimit;
 
             if (state.currentSection === 'final') {
-                const minutes = Math.floor(state.timeRemaining / 60);
-                const seconds = state.timeRemaining % 60;
-                display.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                const mins = Math.floor(state.timeRemaining / 60);
+                const secs = state.timeRemaining % 60;
+                display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
             } else {
                 display.textContent = state.timeRemaining;
             }
@@ -2342,7 +1819,7 @@
         }
 
         // ==================== BOOKMARKS ====================
-        async function toggleBookmark() {
+        function toggleBookmark() {
             const question = state.currentQuizQuestions[state.currentQuestionIndex];
             const index = state.bookmarks.indexOf(question.id);
 
@@ -2357,7 +1834,6 @@
             }
 
             saveToLocalStorage();
-            syncToCloud();
         }
 
         function viewBookmarks() {
@@ -2413,9 +1889,7 @@
                     </div>
                     <span>${section.name} (Q${section.start}-${section.end})</span>
                 </button>
-            `).join('');
-
-            container.innerHTML += `
+            `).join('') + `
                 <button onclick="startStudySection('all')" 
                     class="w-full p-3 bg-purple-500/20 rounded-xl hover:bg-purple-500/30 transition flex items-center gap-3 mt-4">
                     <div class="w-10 h-10 gradient-bg-alt rounded-lg flex items-center justify-center">
@@ -2482,21 +1956,14 @@
 
             text.textContent = message;
 
-            switch (type) {
-                case 'success':
-                    icon.className = 'fas fa-check-circle text-green-400';
-                    break;
-                case 'error':
-                    icon.className = 'fas fa-exclamation-circle text-red-400';
-                    break;
-                case 'warning':
-                    icon.className = 'fas fa-exclamation-triangle text-yellow-400';
-                    break;
-                case 'info':
-                    icon.className = 'fas fa-info-circle text-blue-400';
-                    break;
-            }
+            const icons = {
+                success: 'fas fa-check-circle text-green-400',
+                error: 'fas fa-exclamation-circle text-red-400',
+                warning: 'fas fa-exclamation-triangle text-yellow-400',
+                info: 'fas fa-info-circle text-blue-400'
+            };
 
+            icon.className = icons[type] || icons.success;
             toast.style.transform = 'translateX(0)';
 
             setTimeout(() => {
@@ -2523,20 +1990,15 @@
 
             if (!state.hasAnswered) {
                 if (e.key >= '1' && e.key <= '4') {
-                    const options = ['A', 'B', 'C', 'D'];
-                    selectOption(options[parseInt(e.key) - 1]);
+                    selectOption(['A', 'B', 'C', 'D'][parseInt(e.key) - 1]);
                 }
-                if (e.key === 'Enter') {
-                    submitAnswer();
-                }
+                if (e.key === 'Enter') submitAnswer();
             } else {
-                if (e.key === 'Enter' || e.key === 'ArrowRight') {
-                    nextQuestion();
-                }
+                if (e.key === 'Enter' || e.key === 'ArrowRight') nextQuestion();
             }
         });
 
-        // Initialize app
+        // ==================== START APP ====================
         init();
     </script>
 </body>
