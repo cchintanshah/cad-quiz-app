@@ -336,11 +336,11 @@
                             <p class="text-sm text-gray-400">Active Keys</p>
                         </div>
                         <div class="bg-white/5 rounded-xl p-4 text-center">
-                            <p class="text-3xl font-bold text-blue-400" id="totalQuestionsCount">385</p>
+                            <p class="text-3xl font-bold text-blue-400" id="totalQuestionsCount">204</p>
                             <p class="text-sm text-gray-400">Questions</p>
                         </div>
                         <div class="bg-white/5 rounded-xl p-4 text-center">
-                            <p class="text-3xl font-bold text-yellow-400">8</p>
+                            <p class="text-3xl font-bold text-yellow-400">4</p>
                             <p class="text-sm text-gray-400">Sections</p>
                         </div>
                     </div>
@@ -677,17 +677,49 @@
     <script>
         // ==================== SUPABASE CONFIGURATION ====================
         // IMPORTANT: Replace these with your Supabase project credentials
+        // Leave as-is to run in OFFLINE MODE (no cloud sync)
         const SUPABASE_URL = 'https://idromcktecrfctliraru.supabase.co'; // e.g., 'https://xxxxx.supabase.co'
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlkcm9tY2t0ZWNyZmN0bGlyYXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NjI2MzcsImV4cCI6MjA4NTAzODYzN30.mcMisFnbrGwaEqI8Ze0e83vR0ugizIfj6p4ooQdxviI'; // Your anon/public key
+        const SUPABASE_ANON_KEY = 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4'; // Your anon/public key
 
         // Initialize Supabase client
         let supabase = null;
         let isOnline = navigator.onLine;
+        let isOfflineMode = false; // Track if running without cloud
+
+        // ==================== DEBUG LOGGING ====================
+        const DEBUG = true; // Set to false to disable console logs
+
+        function debugLog(category, message, data = null) {
+            if (!DEBUG) return;
+            const timestamp = new Date().toISOString().substr(11, 12);
+            const prefix = `[${timestamp}] [${category}]`;
+            if (data) {
+                console.log(`${prefix} ${message}`, data);
+            } else {
+                console.log(`${prefix} ${message}`);
+            }
+        }
+
+        function debugError(category, message, error = null) {
+            const timestamp = new Date().toISOString().substr(11, 12);
+            const prefix = `[${timestamp}] [${category}] ❌`;
+            if (error) {
+                console.error(`${prefix} ${message}`, error);
+            } else {
+                console.error(`${prefix} ${message}`);
+            }
+        }
+
+        function debugSuccess(category, message) {
+            const timestamp = new Date().toISOString().substr(11, 12);
+            console.log(`[${timestamp}] [${category}] ✅ ${message}`);
+        }
 
         // ==================== CONFIGURATION ====================
         const CONFIG = {
             questionTimeLimit: 90, // seconds
             finalExamTimeLimit: 90 * 60, // 90 minutes in seconds
+            totalQuestions: 204, // Total questions in questions.json
             sectionsConfig: [
                 { id: 1, name: 'Section 1', start: 1, end: 60, icon: 'fa-database' },
                 { id: 2, name: 'Section 2', start: 61, end: 120, icon: 'fa-cogs' },
@@ -696,6 +728,8 @@
             ],
             finalExamQuestions: 60
         };
+
+        debugLog('CONFIG', 'Configuration loaded', CONFIG);
 
         // ==================== STATE MANAGEMENT ====================
         let state = {
@@ -721,28 +755,76 @@
 
         // ==================== SUPABASE INITIALIZATION ====================
         async function initSupabase() {
+            debugLog('INIT', '========== STARTING SUPABASE INITIALIZATION ==========');
+            debugLog('INIT', 'SUPABASE_URL:', SUPABASE_URL);
+            debugLog('INIT', 'SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 20) + '...' : 'NOT SET');
+
             try {
-                updateLoadingStatus('Initializing cloud connection...');
+                updateLoadingStatus('Checking cloud connection...');
 
-                if (SUPABASE_URL === 'https://idromcktecrfctliraru.supabase.co' || SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlkcm9tY2t0ZWNyZmN0bGlyYXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NjI2MzcsImV4cCI6MjA4NTAzODYzN30.mcMisFnbrGwaEqI8Ze0e83vR0ugizIfj6p4ooQdxviI') {
-                    console.warn('Supabase not configured. Running in offline mode.');
+                // Check if Supabase is configured
+                if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+                    debugLog('INIT', '⚠️ Supabase credentials not configured - using placeholder values');
+                    debugLog('INIT', 'To enable cloud sync, replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY');
+                    updateLoadingStatus('Running in offline mode...');
+                    isOfflineMode = true;
+                    debugSuccess('INIT', 'Switched to OFFLINE mode');
                     return false;
                 }
 
+                debugLog('INIT', 'Supabase credentials found, attempting connection...');
+                updateLoadingStatus('Connecting to cloud...');
+
+                // Check if Supabase library is loaded
+                if (typeof window.supabase === 'undefined') {
+                    debugError('INIT', 'Supabase JS library not loaded! Check CDN link.');
+                    updateLoadingStatus('Error: Supabase library not loaded');
+                    isOfflineMode = true;
+                    return false;
+                }
+
+                debugLog('INIT', 'Creating Supabase client...');
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                debugSuccess('INIT', 'Supabase client created');
 
-                // Test connection
-                const { data, error } = await supabase.from('license_keys').select('count').limit(1);
+                // Test connection with timeout
+                debugLog('INIT', 'Testing database connection (5 second timeout)...');
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Connection timeout after 5 seconds')), 5000)
+                );
 
-                if (error) {
-                    console.error('Supabase connection error:', error);
+                const connectionPromise = supabase.from('license_keys').select('count').limit(1);
+
+                try {
+                    const { data, error } = await Promise.race([connectionPromise, timeoutPromise]);
+
+                    if (error) {
+                        debugError('INIT', 'Supabase query error:', error);
+                        debugLog('INIT', 'Error details:', {
+                            message: error.message,
+                            code: error.code,
+                            hint: error.hint,
+                            details: error.details
+                        });
+                        updateLoadingStatus('Cloud unavailable, using offline mode...');
+                        isOfflineMode = true;
+                        return false;
+                    }
+
+                    debugSuccess('INIT', 'Database connection successful!');
+                    debugLog('INIT', 'Query result:', data);
+                    isOfflineMode = false;
+                    return true;
+                } catch (e) {
+                    debugError('INIT', 'Connection failed:', e.message);
+                    updateLoadingStatus('Cloud unavailable, using offline mode...');
+                    isOfflineMode = true;
                     return false;
                 }
-
-                console.log('Supabase connected successfully');
-                return true;
             } catch (error) {
-                console.error('Failed to initialize Supabase:', error);
+                debugError('INIT', 'Failed to initialize Supabase:', error);
+                updateLoadingStatus('Using offline mode...');
+                isOfflineMode = true;
                 return false;
             }
         }
@@ -963,38 +1045,98 @@
 
         // ==================== INITIALIZATION ====================
         async function init() {
-            updateLoadingStatus('Loading questions...');
-            await loadQuestions();
+            debugLog('APP', '========================================');
+            debugLog('APP', '     SN QUIZ APP - INITIALIZATION      ');
+            debugLog('APP', '========================================');
+            debugLog('APP', 'Browser:', navigator.userAgent);
+            debugLog('APP', 'Online status:', navigator.onLine);
+            debugLog('APP', 'Current URL:', window.location.href);
 
-            updateLoadingStatus('Connecting to cloud...');
-            const cloudConnected = await initSupabase();
+            try {
+                debugLog('APP', 'Step 1: Loading questions...');
+                updateLoadingStatus('Loading questions...');
+                await loadQuestions();
+                debugSuccess('APP', `Questions loaded: ${state.questions.length} questions`);
 
-            if (!cloudConnected) {
+                debugLog('APP', 'Step 2: Initializing Supabase...');
+                updateLoadingStatus('Checking connection...');
+                const cloudConnected = await initSupabase();
+                debugLog('APP', 'Cloud connected:', cloudConnected);
+                debugLog('APP', 'Offline mode:', isOfflineMode);
+
+                if (!cloudConnected || isOfflineMode) {
+                    debugLog('APP', 'Step 3: Setting up offline mode...');
+                    updateSyncStatus('offline');
+                    loadFromLocalStorage();
+
+                    // Setup default license keys for offline mode
+                    if (!localStorage.getItem('snquiz_license_keys')) {
+                        debugLog('APP', 'Creating default license keys...');
+                        localStorage.setItem('snquiz_license_keys', JSON.stringify(['SNQUIZ-2024-DEMO', 'SNQUIZ-FREE-TRIAL']));
+                    }
+                    if (!localStorage.getItem('snquiz_admin_password')) {
+                        debugLog('APP', 'Setting default admin password...');
+                        localStorage.setItem('snquiz_admin_password', 'admin123');
+                    }
+                    debugSuccess('APP', 'Offline mode setup complete');
+                } else {
+                    debugSuccess('APP', 'Cloud mode active');
+                }
+
+                // Check for saved session
+                const savedUser = localStorage.getItem('snquiz_current_user');
+                debugLog('APP', 'Saved user session:', savedUser ? savedUser.substring(0, 10) + '...' : 'None');
+
+                if (savedUser) {
+                    state.currentUser = savedUser;
+                    if (cloudConnected && !isOfflineMode) {
+                        debugLog('APP', 'Step 4: Syncing progress from cloud...');
+                        updateLoadingStatus('Syncing your progress...');
+                        await loadFromCloud();
+                        debugSuccess('APP', 'Progress synced from cloud');
+                    }
+                }
+
+                // Setup online/offline listeners
+                window.addEventListener('online', () => {
+                    debugLog('NETWORK', 'Network status: ONLINE');
+                    isOnline = true;
+                    if (state.currentUser && !isOfflineMode) syncToCloud();
+                });
+
+                window.addEventListener('offline', () => {
+                    debugLog('NETWORK', 'Network status: OFFLINE');
+                    isOnline = false;
+                    updateSyncStatus('offline');
+                });
+
+                // Hide loading and show app
+                debugLog('APP', 'Step 5: Finishing initialization...');
+                finishLoading();
+                debugSuccess('APP', '========== APP READY ==========');
+
+            } catch (error) {
+                debugError('APP', 'Initialization error:', error);
+                debugLog('APP', 'Error stack:', error.stack);
+                updateLoadingStatus('Starting in offline mode...');
+                isOfflineMode = true;
                 updateSyncStatus('offline');
                 loadFromLocalStorage();
-            }
 
-            // Check for saved session
-            const savedUser = localStorage.getItem('snquiz_current_user');
-            if (savedUser) {
-                state.currentUser = savedUser;
-                if (cloudConnected) {
-                    updateLoadingStatus('Syncing your progress...');
-                    await loadFromCloud();
+                // Setup defaults
+                if (!localStorage.getItem('snquiz_license_keys')) {
+                    localStorage.setItem('snquiz_license_keys', JSON.stringify(['SNQUIZ-2024-DEMO', 'SNQUIZ-FREE-TRIAL']));
                 }
+                if (!localStorage.getItem('snquiz_admin_password')) {
+                    localStorage.setItem('snquiz_admin_password', 'admin123');
+                }
+
+                finishLoading();
+                debugLog('APP', 'App started in offline mode due to error');
             }
+        }
 
-            // Setup online/offline listeners
-            window.addEventListener('online', () => {
-                isOnline = true;
-                if (state.currentUser) syncToCloud();
-            });
-
-            window.addEventListener('offline', () => {
-                isOnline = false;
-                updateSyncStatus('offline');
-            });
-
+        function finishLoading() {
             setTimeout(() => {
                 document.getElementById('loadingScreen').classList.add('hide');
                 document.getElementById('app').classList.remove('hide');
@@ -1004,7 +1146,7 @@
                 } else {
                     showLoginScreen();
                 }
-            }, 1000);
+            }, 500);
         }
 
         function updateLoadingStatus(message) {
@@ -1012,21 +1154,43 @@
         }
 
         async function loadQuestions() {
+            debugLog('QUESTIONS', 'Attempting to load questions.json...');
             try {
                 const response = await fetch('questions.json');
+                debugLog('QUESTIONS', 'Fetch response status:', response.status);
+
                 if (response.ok) {
                     state.questions = await response.json();
+                    debugSuccess('QUESTIONS', `Loaded ${state.questions.length} questions from questions.json`);
+
+                    // Validate questions format
+                    if (state.questions.length > 0) {
+                        const sample = state.questions[0];
+                        debugLog('QUESTIONS', 'Sample question format:', {
+                            id: sample.id,
+                            hasQuestion: !!sample.question,
+                            hasOptions: !!sample.options,
+                            hasCorrect: !!sample.correct,
+                            type: sample.type
+                        });
+                    }
                 } else {
+                    debugError('QUESTIONS', `Failed to load questions.json (HTTP ${response.status})`);
+                    debugLog('QUESTIONS', 'Falling back to sample questions...');
                     state.questions = generateSampleQuestions();
                 }
             } catch (error) {
-                console.log('Loading sample questions...');
+                debugError('QUESTIONS', 'Error loading questions:', error.message);
+                debugLog('QUESTIONS', 'Using generated sample questions...');
                 state.questions = generateSampleQuestions();
             }
+
             document.getElementById('totalQuestionsCount').textContent = state.questions.length;
+            debugLog('QUESTIONS', 'Total questions available:', state.questions.length);
         }
 
         function generateSampleQuestions() {
+            debugLog('QUESTIONS', 'Generating sample questions (fallback mode)...');
             const sampleQuestions = [];
             const topics = [
                 'Service Catalog', 'CMDB', 'ITSM', 'Flow Designer', 'UI Policies',
@@ -1035,7 +1199,8 @@
                 'Change Management', 'Problem Management', 'Asset Management'
             ];
 
-            for (let i = 1; i <= 385; i++) {
+            // Generate 204 questions (matching the actual questions.json count)
+            for (let i = 1; i <= CONFIG.totalQuestions; i++) {
                 const topic = topics[i % topics.length];
                 const isMulti = i % 5 === 0;
 
@@ -1062,17 +1227,23 @@
                     type: isMulti ? 'multi' : 'single'
                 });
             }
+
+            debugLog('QUESTIONS', `Generated ${sampleQuestions.length} sample questions`);
             return sampleQuestions;
         }
 
         // ==================== AUTHENTICATION ====================
         async function validateLicense() {
+            debugLog('AUTH', '========== LICENSE VALIDATION ==========');
             const input = document.getElementById('licenseKeyInput');
             const error = document.getElementById('loginError');
             const loginBtn = document.getElementById('loginBtn');
             const licenseKey = input.value.trim();
 
+            debugLog('AUTH', 'License key entered:', licenseKey ? licenseKey.substring(0, 10) + '...' : 'EMPTY');
+
             if (!licenseKey) {
+                debugLog('AUTH', 'No license key provided');
                 showError(error, 'Please enter a license key');
                 input.classList.add('shake');
                 setTimeout(() => input.classList.remove('shake'), 500);
@@ -1085,8 +1256,12 @@
 
             let isValid = false;
 
-            if (supabase) {
-                // Validate against cloud database
+            // Try cloud validation first (if configured)
+            debugLog('AUTH', 'Supabase available:', !!supabase);
+            debugLog('AUTH', 'Offline mode:', isOfflineMode);
+
+            if (supabase && !isOfflineMode) {
+                debugLog('AUTH', 'Attempting cloud validation...');
                 try {
                     const { data, error: queryError } = await supabase
                         .from('license_keys')
@@ -1095,41 +1270,62 @@
                         .eq('is_active', true)
                         .single();
 
+                    debugLog('AUTH', 'Cloud query result:', { data, error: queryError });
+
                     if (data && !queryError) {
                         // Check expiry
                         if (data.expires_at && new Date(data.expires_at) < new Date()) {
+                            debugLog('AUTH', 'License key expired:', data.expires_at);
                             showError(error, 'This license key has expired.');
-                            isValid = false;
+                            loginBtn.disabled = false;
+                            loginBtn.innerHTML = '<i class="fas fa-unlock"></i> Access Quiz';
+                            return;
                         } else {
+                            debugSuccess('AUTH', 'License validated via cloud');
                             isValid = true;
                         }
+                    } else {
+                        debugLog('AUTH', 'License not found in cloud database');
                     }
                 } catch (e) {
-                    console.error('License validation error:', e);
+                    debugError('AUTH', 'License validation error:', e);
                 }
             }
 
-            // Fallback to local validation
-            if (!isValid && !supabase) {
-                const localKeys = ['SNQUIZ-2024-DEMO', 'SNQUIZ-FREE-TRIAL'];
+            // Fallback to local validation (offline mode or cloud failed)
+            if (!isValid) {
+                debugLog('AUTH', 'Attempting local validation...');
+                const localKeys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '["SNQUIZ-2024-DEMO", "SNQUIZ-FREE-TRIAL"]');
+                debugLog('AUTH', 'Local keys available:', localKeys);
                 isValid = localKeys.includes(licenseKey);
+                debugLog('AUTH', 'Local validation result:', isValid);
             }
 
             loginBtn.disabled = false;
             loginBtn.innerHTML = '<i class="fas fa-unlock"></i> Access Quiz';
 
             if (isValid) {
+                debugSuccess('AUTH', 'License key accepted!');
                 state.currentUser = licenseKey;
                 localStorage.setItem('snquiz_current_user', licenseKey);
 
-                // Load user's data from cloud
-                if (supabase) {
+                // Load user's data from cloud if available
+                if (supabase && !isOfflineMode) {
+                    debugLog('AUTH', 'Loading progress from cloud...');
                     await loadFromCloud();
+                } else {
+                    debugLog('AUTH', 'Loading progress from local storage...');
+                    loadFromLocalStorage();
                 }
 
-                showToast('Welcome! Your progress syncs across all devices.', 'success');
+                if (isOfflineMode) {
+                    showToast('Welcome! Running in offline mode.', 'success');
+                } else {
+                    showToast('Welcome! Your progress syncs across devices.', 'success');
+                }
                 showDashboard();
             } else {
+                debugError('AUTH', 'Invalid license key');
                 showError(error, 'Invalid license key. Please try again.');
                 input.classList.add('shake');
                 setTimeout(() => input.classList.remove('shake'), 500);
@@ -1153,7 +1349,8 @@
 
             let isValid = false;
 
-            if (supabase) {
+            // Try cloud validation first
+            if (supabase && !isOfflineMode) {
                 try {
                     const { data } = await supabase
                         .from('admin_settings')
@@ -1169,9 +1366,12 @@
                 }
             }
 
-            // Fallback
-            if (!isValid && password === 'admin123') {
-                isValid = true;
+            // Fallback to local validation
+            if (!isValid) {
+                const localAdminPass = localStorage.getItem('snquiz_admin_password') || 'admin123';
+                if (password === localAdminPass) {
+                    isValid = true;
+                }
             }
 
             if (isValid) {
@@ -1250,44 +1450,79 @@
         async function updateAdminPanel() {
             let keys = [];
 
-            if (supabase) {
+            // Try cloud first, fall back to local
+            if (supabase && !isOfflineMode) {
                 try {
                     const { data } = await supabase.from('license_keys').select('*').order('created_at', { ascending: false });
                     if (data) keys = data;
                 } catch (e) {
-                    console.error('Failed to load keys:', e);
+                    console.error('Failed to load keys from cloud:', e);
                 }
+            }
+
+            // Fallback to local keys
+            if (keys.length === 0 || isOfflineMode) {
+                const localKeys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
+                keys = localKeys.map((key, index) => ({
+                    id: index,
+                    license_key: key,
+                    is_active: true,
+                    created_at: new Date().toISOString()
+                }));
             }
 
             const listContainer = document.getElementById('licenseKeysList');
 
-            listContainer.innerHTML = keys.map((key) => `
-                <div class="flex items-center justify-between bg-white/5 rounded-xl p-3">
-                    <div class="flex items-center gap-3 flex-1">
-                        <i class="fas fa-key ${key.is_active ? 'text-yellow-400' : 'text-gray-500'}"></i>
-                        <div class="flex-1">
+            if (isOfflineMode) {
+                // Offline mode - simpler UI
+                listContainer.innerHTML = keys.map((key, index) => `
+                    <div class="flex items-center justify-between bg-white/5 rounded-xl p-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-key text-yellow-400"></i>
                             <code class="text-sm">${key.license_key}</code>
-                            <div class="text-xs text-gray-500">
-                                ${key.is_active ? '<span class="text-green-400">Active</span>' : '<span class="text-red-400">Inactive</span>'}
-                                ${key.expires_at ? ` • Expires: ${new Date(key.expires_at).toLocaleDateString()}` : ''}
-                            </div>
                         </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="toggleKeyStatus('${key.id}', ${!key.is_active})" 
-                            class="p-2 ${key.is_active ? 'text-yellow-400 hover:bg-yellow-500/20' : 'text-green-400 hover:bg-green-500/20'} rounded-lg transition">
-                            <i class="fas ${key.is_active ? 'fa-pause' : 'fa-play'}"></i>
-                        </button>
-                        <button onclick="deleteLicenseKey('${key.id}')" class="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition">
+                        <button onclick="deleteLicenseKeyLocal(${index})" class="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                listContainer.innerHTML = keys.map((key) => `
+                    <div class="flex items-center justify-between bg-white/5 rounded-xl p-3">
+                        <div class="flex items-center gap-3 flex-1">
+                            <i class="fas fa-key ${key.is_active ? 'text-yellow-400' : 'text-gray-500'}"></i>
+                            <div class="flex-1">
+                                <code class="text-sm">${key.license_key}</code>
+                                <div class="text-xs text-gray-500">
+                                    ${key.is_active ? '<span class="text-green-400">Active</span>' : '<span class="text-red-400">Inactive</span>'}
+                                    ${key.expires_at ? ` • Expires: ${new Date(key.expires_at).toLocaleDateString()}` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="toggleKeyStatus('${key.id}', ${!key.is_active})" 
+                                class="p-2 ${key.is_active ? 'text-yellow-400 hover:bg-yellow-500/20' : 'text-green-400 hover:bg-green-500/20'} rounded-lg transition">
+                                <i class="fas ${key.is_active ? 'fa-pause' : 'fa-play'}"></i>
+                            </button>
+                            <button onclick="deleteLicenseKey('${key.id}')" class="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
 
-            const activeCount = keys.filter(k => k.is_active).length;
+            const activeCount = keys.filter(k => k.is_active !== false).length;
             document.getElementById('totalKeysCount').textContent = keys.length;
             document.getElementById('activeKeysCount').textContent = activeCount;
+        }
+
+        function deleteLicenseKeyLocal(index) {
+            const keys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
+            keys.splice(index, 1);
+            localStorage.setItem('snquiz_license_keys', JSON.stringify(keys));
+            updateAdminPanel();
+            showToast('License key deleted', 'success');
         }
 
         async function addLicenseKey() {
@@ -1299,7 +1534,8 @@
                 return;
             }
 
-            if (supabase) {
+            // Cloud mode
+            if (supabase && !isOfflineMode) {
                 try {
                     const { error } = await supabase.from('license_keys').insert({
                         license_key: key,
@@ -1321,6 +1557,20 @@
                 } catch (e) {
                     showToast('Failed to add license key', 'error');
                 }
+            } else {
+                // Offline mode - save to localStorage
+                const keys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
+
+                if (keys.includes(key)) {
+                    showToast('This license key already exists', 'error');
+                    return;
+                }
+
+                keys.push(key);
+                localStorage.setItem('snquiz_license_keys', JSON.stringify(keys));
+                input.value = '';
+                updateAdminPanel();
+                showToast('License key added successfully', 'success');
             }
         }
 
@@ -1363,21 +1613,30 @@
         }
 
         async function exportLicenseKeys() {
-            if (supabase) {
+            let keys = [];
+
+            if (supabase && !isOfflineMode) {
                 try {
                     const { data } = await supabase.from('license_keys').select('license_key, is_active, created_at, expires_at');
-                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'license_keys.json';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    showToast('License keys exported', 'success');
+                    keys = data || [];
                 } catch (e) {
-                    showToast('Failed to export keys', 'error');
+                    showToast('Failed to export keys from cloud', 'error');
+                    return;
                 }
+            } else {
+                // Offline mode
+                const localKeys = JSON.parse(localStorage.getItem('snquiz_license_keys') || '[]');
+                keys = localKeys.map(k => ({ license_key: k, is_active: true }));
             }
+
+            const blob = new Blob([JSON.stringify(keys, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'license_keys.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('License keys exported', 'success');
         }
 
         async function changeAdminPassword() {
@@ -1389,7 +1648,8 @@
                 return;
             }
 
-            if (supabase) {
+            // Cloud mode
+            if (supabase && !isOfflineMode) {
                 try {
                     const { data } = await supabase
                         .from('admin_settings')
@@ -1412,6 +1672,19 @@
                 } catch (e) {
                     showToast('Failed to change password', 'error');
                 }
+            } else {
+                // Offline mode
+                const storedPass = localStorage.getItem('snquiz_admin_password') || 'admin123';
+
+                if (current !== storedPass) {
+                    showToast('Current password is incorrect', 'error');
+                    return;
+                }
+
+                localStorage.setItem('snquiz_admin_password', newPass);
+                document.getElementById('currentAdminPass').value = '';
+                document.getElementById('newAdminPass').value = '';
+                showToast('Admin password changed successfully', 'success');
             }
         }
 
