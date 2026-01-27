@@ -678,8 +678,8 @@
         // ==================== SUPABASE CONFIGURATION ====================
         // IMPORTANT: Replace these with your Supabase project credentials
         // Leave as-is to run in OFFLINE MODE (no cloud sync)
-        const SUPABASE_URL = 'https://idromcktecrfctliraru.supabase.co'; // e.g., 'https://xxxxx.supabase.co'
-        const SUPABASE_ANON_KEY = 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4'; // Your anon/public key
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // e.g., 'https://xxxxx.supabase.co'
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Your anon/public key
 
         // Initialize Supabase client
         let supabaseClient = null;
@@ -763,7 +763,7 @@
                 updateLoadingStatus('Checking cloud connection...');
 
                 // Check if Supabase is configured
-                if (SUPABASE_URL === 'https://idromcktecrfctliraru.supabase.co' || SUPABASE_ANON_KEY === 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4') {
+                if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
                     debugLog('INIT', '⚠️ Supabase credentials not configured - using placeholder values');
                     debugLog('INIT', 'To enable cloud sync, replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY');
                     updateLoadingStatus('Running in offline mode...');
