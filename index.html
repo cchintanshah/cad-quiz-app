@@ -682,7 +682,7 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4'; // Your anon/public key
 
         // Initialize Supabase client
-        let supabase = null;
+        let supabaseClient = null;
         let isOnline = navigator.onLine;
         let isOfflineMode = false; // Track if running without cloud
 
@@ -763,7 +763,7 @@
                 updateLoadingStatus('Checking cloud connection...');
 
                 // Check if Supabase is configured
-                if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+                if (SUPABASE_URL === 'https://idromcktecrfctliraru.supabase.co' || SUPABASE_ANON_KEY === 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4') {
                     debugLog('INIT', '⚠️ Supabase credentials not configured - using placeholder values');
                     debugLog('INIT', 'To enable cloud sync, replace YOUR_SUPABASE_URL and YOUR_SUPABASE_ANON_KEY');
                     updateLoadingStatus('Running in offline mode...');
@@ -784,7 +784,7 @@
                 }
 
                 debugLog('INIT', 'Creating Supabase client...');
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 debugSuccess('INIT', 'Supabase client created');
 
                 // Test connection with timeout
@@ -793,7 +793,7 @@
                     setTimeout(() => reject(new Error('Connection timeout after 5 seconds')), 5000)
                 );
 
-                const connectionPromise = supabase.from('license_keys').select('count').limit(1);
+                const connectionPromise = supabaseClient.from('license_keys').select('count').limit(1);
 
                 try {
                     const { data, error } = await Promise.race([connectionPromise, timeoutPromise]);
@@ -859,7 +859,7 @@
         }
 
         async function syncToCloud() {
-            if (!supabase || !state.currentUser || state.isSyncing) return;
+            if (!supabaseClient || !state.currentUser || state.isSyncing) return;
 
             state.isSyncing = true;
             updateSyncStatus('syncing');
@@ -867,7 +867,7 @@
             try {
                 // Sync section progress
                 for (const [sectionId, progress] of Object.entries(state.sectionProgress)) {
-                    await supabase.from('user_progress').upsert({
+                    await supabaseClient.from('user_progress').upsert({
                         license_key: state.currentUser,
                         section_id: sectionId.toString(),
                         score: progress.correct || 0,
@@ -878,23 +878,23 @@
                 }
 
                 // Sync bookmarks
-                await supabase.from('bookmarks').delete().eq('license_key', state.currentUser);
+                await supabaseClient.from('bookmarks').delete().eq('license_key', state.currentUser);
                 if (state.bookmarks.length > 0) {
                     const bookmarkInserts = state.bookmarks.map(qId => ({
                         license_key: state.currentUser,
                         question_id: qId
                     }));
-                    await supabase.from('bookmarks').insert(bookmarkInserts);
+                    await supabaseClient.from('bookmarks').insert(bookmarkInserts);
                 }
 
                 // Sync wrong answers
-                await supabase.from('wrong_answers').delete().eq('license_key', state.currentUser);
+                await supabaseClient.from('wrong_answers').delete().eq('license_key', state.currentUser);
                 if (state.wrongAnswers.length > 0) {
                     const wrongInserts = state.wrongAnswers.map(qId => ({
                         license_key: state.currentUser,
                         question_id: qId
                     }));
-                    await supabase.from('wrong_answers').insert(wrongInserts);
+                    await supabaseClient.from('wrong_answers').insert(wrongInserts);
                 }
 
                 updateSyncStatus('synced');
@@ -907,7 +907,7 @@
         }
 
         async function syncQuizSession() {
-            if (!supabase || !state.currentUser || state.isStudyMode) return;
+            if (!supabaseClient || !state.currentUser || state.isStudyMode) return;
 
             try {
                 const sessionData = {
@@ -922,7 +922,7 @@
                     updated_at: new Date().toISOString()
                 };
 
-                await supabase.from('quiz_sessions').upsert(sessionData, {
+                await supabaseClient.from('quiz_sessions').upsert(sessionData, {
                     onConflict: 'license_key,section_id'
                 });
             } catch (error) {
@@ -931,13 +931,13 @@
         }
 
         async function loadFromCloud() {
-            if (!supabase || !state.currentUser) return;
+            if (!supabaseClient || !state.currentUser) return;
 
             updateSyncStatus('syncing');
 
             try {
                 // Load progress
-                const { data: progressData } = await supabase
+                const { data: progressData } = await supabaseClient
                     .from('user_progress')
                     .select('*')
                     .eq('license_key', state.currentUser);
