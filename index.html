@@ -767,7 +767,7 @@
 
         async function initSupabase() {
             // Check if credentials are configured
-            if (SUPABASE_URL === 'https://idromcktecrfctliraru.supabase.co' || SUPABASE_PUBLISHABLE_KEY === 'sb_publishable_eGeBMw8YQZoemVR5tFXPiw_S0HCIX-4') {
+            if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_PUBLISHABLE_KEY === 'YOUR_SUPABASE_PUBLISHABLE_KEY') {
                 log('⚠️ Supabase not configured - using offline mode');
                 isOfflineMode = true;
                 return;
@@ -1997,6 +1997,178 @@
                 if (e.key === 'Enter' || e.key === 'ArrowRight') nextQuestion();
             }
         });
+
+        // ==================== TEST FUNCTIONS (Run from Console) ====================
+
+        // Test function to check Supabase connection
+        window.testSupabase = async function () {
+            console.log('');
+            console.log('╔════════════════════════════════════════════════════════════╗');
+            console.log('║           SUPABASE CONNECTION TEST                         ║');
+            console.log('╚════════════════════════════════════════════════════════════╝');
+            console.log('');
+
+            // Step 1: Check configuration
+            console.log('📋 STEP 1: Checking Configuration...');
+            console.log('   SUPABASE_URL:', SUPABASE_URL);
+            console.log('   SUPABASE_PUBLISHABLE_KEY:', SUPABASE_PUBLISHABLE_KEY ? SUPABASE_PUBLISHABLE_KEY.substring(0, 20) + '...' : 'NOT SET');
+
+            if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_PUBLISHABLE_KEY === 'YOUR_SUPABASE_PUBLISHABLE_KEY') {
+                console.log('');
+                console.log('❌ CONFIGURATION ERROR!');
+                console.log('   You need to replace the placeholder values with your actual Supabase credentials.');
+                console.log('');
+                console.log('   📍 Where to find your credentials:');
+                console.log('   1. Go to https://supabase.com and login');
+                console.log('   2. Select your project');
+                console.log('   3. Click "Settings" (gear icon) → "API"');
+                console.log('   4. Copy "Project URL" and "anon public" key under "Project API keys"');
+                console.log('');
+                return false;
+            }
+            console.log('   ✅ Configuration looks good!');
+            console.log('');
+
+            // Step 2: Check if Supabase library loaded
+            console.log('📋 STEP 2: Checking Supabase Library...');
+            if (typeof window.supabase === 'undefined') {
+                console.log('   ❌ Supabase library not loaded!');
+                console.log('   Check your internet connection and refresh the page.');
+                return false;
+            }
+            console.log('   ✅ Supabase library loaded!');
+            console.log('');
+
+            // Step 3: Try to create client
+            console.log('📋 STEP 3: Creating Supabase Client...');
+            let testClient;
+            try {
+                testClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+                console.log('   ✅ Client created successfully!');
+            } catch (e) {
+                console.log('   ❌ Failed to create client:', e.message);
+                return false;
+            }
+            console.log('');
+
+            // Step 4: Test database connection
+            console.log('📋 STEP 4: Testing Database Connection...');
+            try {
+                const { data, error } = await testClient
+                    .from('license_keys')
+                    .select('count')
+                    .limit(1);
+
+                if (error) {
+                    console.log('   ❌ Database query failed!');
+                    console.log('   Error:', error.message);
+                    console.log('');
+                    console.log('   🔧 Possible fixes:');
+                    if (error.message.includes('relation') || error.message.includes('does not exist')) {
+                        console.log('   → You need to run the database schema!');
+                        console.log('   → Go to Supabase → SQL Editor → New Query');
+                        console.log('   → Paste contents of database/schema.sql and click Run');
+                    } else if (error.message.includes('JWT') || error.message.includes('apikey')) {
+                        console.log('   → Your Publishable Key might be incorrect');
+                        console.log('   → Double-check you copied the full key from Supabase');
+                    } else if (error.message.includes('fetch') || error.message.includes('network')) {
+                        console.log('   → Network error - check your internet connection');
+                        console.log('   → Or CORS issue - make sure you are on HTTPS');
+                    }
+                    return false;
+                }
+                console.log('   ✅ Database connection successful!');
+            } catch (e) {
+                console.log('   ❌ Connection error:', e.message);
+                return false;
+            }
+            console.log('');
+
+            // Step 5: Check license_keys table
+            console.log('📋 STEP 5: Checking License Keys Table...');
+            try {
+                const { data, error } = await testClient
+                    .from('license_keys')
+                    .select('license_key, is_active')
+                    .limit(10);
+
+                if (error) {
+                    console.log('   ❌ Could not read license keys:', error.message);
+                    return false;
+                }
+
+                console.log('   ✅ Found', data.length, 'license keys in database:');
+                data.forEach(key => {
+                    console.log('      •', key.license_key, key.is_active ? '(active)' : '(inactive)');
+                });
+            } catch (e) {
+                console.log('   ❌ Error:', e.message);
+                return false;
+            }
+            console.log('');
+
+            // Step 6: Test inserting a progress record
+            console.log('📋 STEP 6: Testing Write Access...');
+            try {
+                const testKey = 'SNQUIZ-2024-DEMO';
+                const { error } = await testClient
+                    .from('user_progress')
+                    .upsert({
+                        license_key: testKey,
+                        section_id: 'test',
+                        score: 0,
+                        total_questions: 0,
+                        percentage: 0
+                    }, { onConflict: 'license_key,section_id' });
+
+                if (error) {
+                    console.log('   ⚠️ Write test failed:', error.message);
+                    console.log('   This might be due to RLS policies or the test key not existing');
+                } else {
+                    console.log('   ✅ Write access confirmed!');
+
+                    // Clean up test record
+                    await testClient
+                        .from('user_progress')
+                        .delete()
+                        .eq('section_id', 'test');
+                }
+            } catch (e) {
+                console.log('   ⚠️ Write test error:', e.message);
+            }
+            console.log('');
+
+            // Final summary
+            console.log('╔════════════════════════════════════════════════════════════╗');
+            console.log('║           ✅ ALL TESTS PASSED!                             ║');
+            console.log('║           Supabase is connected and working!               ║');
+            console.log('╚════════════════════════════════════════════════════════════╝');
+            console.log('');
+            console.log('🎉 Your app should now sync progress across devices!');
+            console.log('');
+
+            return true;
+        };
+
+        // Quick status check
+        window.checkStatus = function () {
+            console.log('');
+            console.log('📊 SN Quiz App Status:');
+            console.log('   Mode:', isOfflineMode ? '📴 OFFLINE' : '☁️ CLOUD');
+            console.log('   User:', state.currentUser || 'Not logged in');
+            console.log('   Questions loaded:', state.questions.length);
+            console.log('   Supabase client:', supabaseClient ? '✅ Created' : '❌ Not created');
+            console.log('');
+            console.log('💡 Run testSupabase() for detailed connection test');
+            console.log('');
+        };
+
+        // Show available commands on load
+        console.log('');
+        console.log('🔧 SN Quiz App - Debug Commands:');
+        console.log('   • testSupabase() - Test Supabase connection');
+        console.log('   • checkStatus()  - Show app status');
+        console.log('');
 
         // ==================== START APP ====================
         init();
