@@ -210,7 +210,6 @@
                         <i class="fas fa-graduation-cap text-5xl"></i>
                     </div>
                     <h1 class="text-4xl font-bold mb-2">SN Quiz App</h1>
-                    <p class="text-purple-300">Master your knowledge with confidence</p>
                     <div class="mt-3 flex items-center justify-center gap-2 text-sm text-green-400"
                         id="cloudStatusText">
                         <i class="fas fa-cloud"></i>
@@ -372,10 +371,7 @@
                 <div class="text-center mb-8">
                     <h1 class="text-3xl md:text-4xl font-bold mb-2">Welcome to SN Quiz App</h1>
                     <p class="text-purple-300">Select a section to start your quiz journey</p>
-                    <div class="mt-2 flex items-center justify-center gap-2 text-sm text-green-400">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Your progress is automatically saved</span>
-                    </div>
+
                 </div>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="sectionCards"></div>
@@ -706,40 +702,57 @@
 
         // ==================== INITIALIZATION ====================
         async function init() {
-            log('🚀 Starting SN Quiz App...');
+            log('🚀 ========== STARTING SN QUIZ APP ==========');
             updateLoadingStatus('Initializing...');
 
             try {
                 // Step 1: Load questions
-                log('📚 Loading questions...');
+                log('📚 Step 1: Loading questions...');
                 updateLoadingStatus('Loading questions...');
                 await loadQuestions();
                 log(`✅ Loaded ${state.questions.length} questions`);
 
                 // Step 2: Try to connect to Supabase
-                log('☁️ Checking cloud connection...');
-                updateLoadingStatus('Checking cloud...');
+                log('☁️ Step 2: Initializing Supabase...');
+                updateLoadingStatus('Connecting to cloud...');
                 await initSupabase();
 
-                // Step 3: Setup offline defaults if needed
+                // Step 3: Log the result and setup accordingly
+                log('📋 Step 3: Checking connection result...');
+                log('   isOfflineMode =', isOfflineMode);
+                log('   supabaseClient =', supabaseClient ? 'EXISTS' : 'NULL');
+
                 if (isOfflineMode) {
-                    log('📴 Running in offline mode');
+                    log('📴 Running in OFFLINE mode');
                     setupOfflineDefaults();
                     updateSyncStatus('offline');
                     document.getElementById('cloudStatusText').innerHTML =
-                        '<i class="fas fa-database"></i><span>Running in offline mode</span>';
+                        '<i class="fas fa-database"></i><span>Running in offline mode - check console for details</span>';
+                } else {
+                    log('☁️ Running in CLOUD mode');
+                    updateSyncStatus('synced');
+                    document.getElementById('cloudStatusText').innerHTML =
+                        '<i class="fas fa-cloud"></i><span>Connected to cloud - progress syncs across devices</span>';
                 }
 
                 // Step 4: Check for saved session
+                log('👤 Step 4: Checking saved session...');
                 const savedUser = localStorage.getItem('snquiz_current_user');
                 if (savedUser) {
-                    log('👤 Found saved user session');
+                    log('   Found saved user:', savedUser.substring(0, 10) + '...');
                     state.currentUser = savedUser;
                     loadFromLocalStorage();
+                } else {
+                    log('   No saved user found');
                 }
 
                 // Step 5: Show the app
-                log('✅ App ready!');
+                log('✅ Step 5: App initialization complete!');
+                log('========== APP READY ==========');
+                log('   Mode:', isOfflineMode ? 'OFFLINE' : 'CLOUD');
+                log('   Questions:', state.questions.length);
+                log('   User:', state.currentUser || 'None');
+
                 setTimeout(() => {
                     document.getElementById('loadingScreen').classList.add('hide');
                     document.getElementById('app').classList.remove('hide');
@@ -752,7 +765,9 @@
                 }, 500);
 
             } catch (error) {
-                log('❌ Init error:', error);
+                log('❌ ========== INIT ERROR ==========');
+                log('   Error:', error.message);
+                log('   Stack:', error.stack);
                 updateLoadingStatus('Starting in offline mode...');
                 isOfflineMode = true;
                 setupOfflineDefaults();
@@ -766,43 +781,77 @@
         }
 
         async function initSupabase() {
+            log('========== INIT SUPABASE START ==========');
+
             // Check if credentials are configured
+            log('📋 Checking credentials...');
+            log('   URL configured:', SUPABASE_URL !== 'YOUR_SUPABASE_URL');
+            log('   KEY configured:', SUPABASE_PUBLISHABLE_KEY !== 'YOUR_SUPABASE_PUBLISHABLE_KEY');
+
             if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_PUBLISHABLE_KEY === 'YOUR_SUPABASE_PUBLISHABLE_KEY') {
                 log('⚠️ Supabase not configured - using offline mode');
                 isOfflineMode = true;
                 return;
             }
 
+            log('✅ Credentials are configured');
+            log('   URL:', SUPABASE_URL);
+            log('   KEY:', SUPABASE_PUBLISHABLE_KEY.substring(0, 30) + '...');
+
             // Check if Supabase library loaded
+            log('📋 Checking Supabase library...');
+            log('   window.supabase exists:', typeof window.supabase !== 'undefined');
+            log('   window.supabase.createClient exists:', typeof window.supabase?.createClient === 'function');
+
             if (typeof window.supabase === 'undefined') {
                 log('❌ Supabase library not loaded');
                 isOfflineMode = true;
                 return;
             }
 
-            try {
-                log('🔌 Connecting to Supabase...');
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+            log('✅ Supabase library is loaded');
 
-                // Test connection with 3 second timeout
-                const testPromise = supabaseClient.from('license_keys').select('count').limit(1);
+            try {
+                log('🔌 Creating Supabase client...');
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+                log('✅ Supabase client created:', supabaseClient ? 'SUCCESS' : 'FAILED');
+
+                if (!supabaseClient) {
+                    log('❌ supabaseClient is null/undefined');
+                    isOfflineMode = true;
+                    return;
+                }
+
+                // Test connection with 5 second timeout (increased from 3)
+                log('🔌 Testing database connection...');
+                const testPromise = supabaseClient.from('license_keys').select('license_key').limit(1);
                 const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Timeout')), 3000)
+                    setTimeout(() => reject(new Error('Connection timeout after 5 seconds')), 5000)
                 );
 
-                const { error } = await Promise.race([testPromise, timeoutPromise]);
+                log('   Waiting for response...');
+                const result = await Promise.race([testPromise, timeoutPromise]);
 
-                if (error) {
-                    log('❌ Supabase connection failed:', error.message);
+                log('   Response received:', JSON.stringify(result, null, 2));
+
+                if (result.error) {
+                    log('❌ Supabase query error:', result.error.message);
+                    log('   Error details:', JSON.stringify(result.error, null, 2));
                     isOfflineMode = true;
                 } else {
-                    log('✅ Supabase connected!');
+                    log('✅ Supabase connected successfully!');
+                    log('   Data received:', result.data);
                     isOfflineMode = false;
                 }
             } catch (e) {
-                log('❌ Supabase error:', e.message);
+                log('❌ Supabase exception:', e.message);
+                log('   Stack:', e.stack);
                 isOfflineMode = true;
             }
+
+            log('========== INIT SUPABASE END ==========');
+            log('   Final isOfflineMode:', isOfflineMode);
+            log('   Final supabaseClient:', supabaseClient ? 'EXISTS' : 'NULL');
         }
 
         function setupOfflineDefaults() {
@@ -865,6 +914,11 @@
             if (state.savedQuiz) {
                 localStorage.setItem('snquiz_saved_quiz', JSON.stringify(state.savedQuiz));
             }
+
+            // Also sync to cloud if connected
+            if (!isOfflineMode && supabaseClient && state.currentUser) {
+                syncAllToCloud();
+            }
         }
 
         function loadFromLocalStorage() {
@@ -882,6 +936,262 @@
                 if (saved) state.savedQuiz = JSON.parse(saved);
             } catch (e) {
                 log('⚠️ Error loading from localStorage:', e);
+            }
+        }
+
+        // ==================== CLOUD SYNC FUNCTIONS ====================
+        async function syncAllToCloud() {
+            if (isOfflineMode || !supabaseClient || !state.currentUser) return;
+
+            log('☁️ Syncing all data to cloud...');
+            updateSyncStatus('syncing');
+
+            try {
+                await Promise.all([
+                    syncProgressToCloud(),
+                    syncBookmarksToCloud(),
+                    syncWrongAnswersToCloud()
+                ]);
+                updateSyncStatus('synced');
+                log('✅ All data synced to cloud');
+            } catch (e) {
+                log('❌ Cloud sync failed:', e.message);
+                updateSyncStatus('error');
+            }
+        }
+
+        async function syncProgressToCloud() {
+            if (isOfflineMode || !supabaseClient || !state.currentUser) return;
+
+            const progressEntries = Object.entries(state.sectionProgress);
+            if (progressEntries.length === 0) return;
+
+            log('☁️ Syncing progress to cloud...', progressEntries.length + ' sections');
+
+            for (const [sectionId, progress] of progressEntries) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('user_progress')
+                        .upsert({
+                            license_key: state.currentUser,
+                            section_id: String(sectionId),
+                            score: progress.correct || 0,
+                            total_questions: progress.total || 0,
+                            percentage: progress.percentage || 0
+                        }, {
+                            onConflict: 'license_key,section_id'
+                        });
+
+                    if (error) {
+                        log('❌ Failed to sync section ' + sectionId + ':', error.message);
+                    } else {
+                        log('✅ Synced section ' + sectionId);
+                    }
+                } catch (e) {
+                    log('❌ Error syncing section ' + sectionId + ':', e.message);
+                }
+            }
+        }
+
+        async function syncBookmarksToCloud() {
+            if (isOfflineMode || !supabaseClient || !state.currentUser) return;
+            if (state.bookmarks.length === 0) return;
+
+            log('☁️ Syncing bookmarks to cloud...', state.bookmarks.length + ' bookmarks');
+
+            try {
+                // Delete existing bookmarks for this user
+                await supabaseClient
+                    .from('bookmarks')
+                    .delete()
+                    .eq('license_key', state.currentUser);
+
+                // Insert all current bookmarks
+                const bookmarkData = state.bookmarks.map(qId => ({
+                    license_key: state.currentUser,
+                    question_id: qId
+                }));
+
+                const { error } = await supabaseClient
+                    .from('bookmarks')
+                    .insert(bookmarkData);
+
+                if (error) {
+                    log('❌ Failed to sync bookmarks:', error.message);
+                } else {
+                    log('✅ Synced ' + state.bookmarks.length + ' bookmarks');
+                }
+            } catch (e) {
+                log('❌ Error syncing bookmarks:', e.message);
+            }
+        }
+
+        async function syncWrongAnswersToCloud() {
+            if (isOfflineMode || !supabaseClient || !state.currentUser) return;
+            if (state.wrongAnswers.length === 0) return;
+
+            log('☁️ Syncing wrong answers to cloud...', state.wrongAnswers.length + ' items');
+
+            try {
+                // Delete existing wrong answers for this user
+                await supabaseClient
+                    .from('wrong_answers')
+                    .delete()
+                    .eq('license_key', state.currentUser);
+
+                // Insert all current wrong answers
+                const wrongData = state.wrongAnswers.map(qId => ({
+                    license_key: state.currentUser,
+                    question_id: qId
+                }));
+
+                const { error } = await supabaseClient
+                    .from('wrong_answers')
+                    .insert(wrongData);
+
+                if (error) {
+                    log('❌ Failed to sync wrong answers:', error.message);
+                } else {
+                    log('✅ Synced ' + state.wrongAnswers.length + ' wrong answers');
+                }
+            } catch (e) {
+                log('❌ Error syncing wrong answers:', e.message);
+            }
+        }
+
+        async function syncQuizSessionToCloud() {
+            if (isOfflineMode || !supabaseClient || !state.currentUser || !state.savedQuiz) return;
+
+            log('☁️ Syncing quiz session to cloud...');
+
+            try {
+                const { error } = await supabaseClient
+                    .from('quiz_sessions')
+                    .upsert({
+                        license_key: state.currentUser,
+                        section_id: String(state.savedQuiz.section),
+                        current_question_index: state.savedQuiz.questionIndex,
+                        score: state.savedQuiz.score,
+                        question_ids: state.savedQuiz.questionsIds,
+                        answered_questions: state.savedQuiz.answeredQuestions || [],
+                        time_remaining: state.savedQuiz.timeRemaining
+                    }, {
+                        onConflict: 'license_key,section_id'
+                    });
+
+                if (error) {
+                    log('❌ Failed to sync quiz session:', error.message);
+                } else {
+                    log('✅ Quiz session synced');
+                }
+            } catch (e) {
+                log('❌ Error syncing quiz session:', e.message);
+            }
+        }
+
+        async function loadFromCloud() {
+            if (isOfflineMode || !supabaseClient || !state.currentUser) {
+                log('📴 Skipping cloud load - offline mode or no user');
+                return;
+            }
+
+            log('☁️ Loading data from cloud for:', state.currentUser);
+            updateSyncStatus('syncing');
+
+            try {
+                // Load progress
+                const { data: progressData, error: progressError } = await supabaseClient
+                    .from('user_progress')
+                    .select('*')
+                    .eq('license_key', state.currentUser);
+
+                if (progressData && !progressError) {
+                    progressData.forEach(p => {
+                        state.sectionProgress[p.section_id] = {
+                            correct: p.score,
+                            total: p.total_questions,
+                            percentage: p.percentage
+                        };
+                    });
+                    log('✅ Loaded ' + progressData.length + ' progress records from cloud');
+                }
+
+                // Load bookmarks
+                const { data: bookmarksData, error: bookmarksError } = await supabaseClient
+                    .from('bookmarks')
+                    .select('question_id')
+                    .eq('license_key', state.currentUser);
+
+                if (bookmarksData && !bookmarksError) {
+                    state.bookmarks = bookmarksData.map(b => b.question_id);
+                    log('✅ Loaded ' + state.bookmarks.length + ' bookmarks from cloud');
+                }
+
+                // Load wrong answers
+                const { data: wrongData, error: wrongError } = await supabaseClient
+                    .from('wrong_answers')
+                    .select('question_id')
+                    .eq('license_key', state.currentUser);
+
+                if (wrongData && !wrongError) {
+                    state.wrongAnswers = wrongData.map(w => w.question_id);
+                    log('✅ Loaded ' + state.wrongAnswers.length + ' wrong answers from cloud');
+                }
+
+                // Load quiz session
+                const { data: sessionData, error: sessionError } = await supabaseClient
+                    .from('quiz_sessions')
+                    .select('*')
+                    .eq('license_key', state.currentUser)
+                    .order('updated_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (sessionData && !sessionError) {
+                    state.savedQuiz = {
+                        section: sessionData.section_id,
+                        questionIndex: sessionData.current_question_index,
+                        score: sessionData.score,
+                        questionsIds: sessionData.question_ids,
+                        answeredQuestions: sessionData.answered_questions || [],
+                        timeRemaining: sessionData.time_remaining
+                    };
+                    log('✅ Loaded saved quiz session from cloud');
+                }
+
+                // Save to localStorage as backup
+                saveToLocalStorageOnly();
+
+                updateSyncStatus('synced');
+                log('✅ All cloud data loaded successfully');
+
+            } catch (e) {
+                log('❌ Error loading from cloud:', e.message);
+                updateSyncStatus('error');
+            }
+        }
+
+        function saveToLocalStorageOnly() {
+            // Save without triggering cloud sync
+            localStorage.setItem('snquiz_progress', JSON.stringify(state.sectionProgress));
+            localStorage.setItem('snquiz_bookmarks', JSON.stringify(state.bookmarks));
+            localStorage.setItem('snquiz_wrong_answers', JSON.stringify(state.wrongAnswers));
+            if (state.savedQuiz) {
+                localStorage.setItem('snquiz_saved_quiz', JSON.stringify(state.savedQuiz));
+            }
+        }
+
+        async function clearCloudSession() {
+            if (isOfflineMode || !supabaseClient || !state.currentUser) return;
+
+            try {
+                await supabaseClient
+                    .from('quiz_sessions')
+                    .delete()
+                    .eq('license_key', state.currentUser);
+                log('✅ Cloud session cleared');
+            } catch (e) {
+                log('⚠️ Could not clear cloud session:', e.message);
             }
         }
 
@@ -967,8 +1277,17 @@
             if (isValid) {
                 state.currentUser = licenseKey;
                 localStorage.setItem('snquiz_current_user', licenseKey);
+
+                // First load from localStorage (fast)
                 loadFromLocalStorage();
-                showToast('Welcome!', 'success');
+
+                // Then try to load from cloud (may override local data)
+                if (!isOfflineMode && supabaseClient) {
+                    log('☁️ Loading user data from cloud...');
+                    await loadFromCloud();
+                }
+
+                showToast('Welcome! Your progress is synced.', 'success');
                 showDashboard();
             } else {
                 showError(error, 'Invalid license key. Please try again.');
@@ -1336,6 +1655,9 @@
             localStorage.removeItem('snquiz_saved_quiz');
             state.savedQuiz = null;
             document.getElementById('resumeBanner').classList.add('hide');
+
+            // Also clear from cloud
+            clearCloudSession();
         }
 
         function saveQuizState() {
@@ -1350,6 +1672,9 @@
                 timeRemaining: state.timeRemaining
             };
             localStorage.setItem('snquiz_saved_quiz', JSON.stringify(state.savedQuiz));
+
+            // Also sync to cloud
+            syncQuizSessionToCloud();
         }
 
         function loadQuestion() {
@@ -1736,7 +2061,7 @@
             document.getElementById('resetModal').classList.add('hide');
         }
 
-        function resetAllProgress() {
+        async function resetAllProgress() {
             state.sectionProgress = {};
             state.bookmarks = [];
             state.wrongAnswers = [];
@@ -1746,6 +2071,22 @@
             localStorage.removeItem('snquiz_bookmarks');
             localStorage.removeItem('snquiz_wrong_answers');
             localStorage.removeItem('snquiz_saved_quiz');
+
+            // Also clear from cloud
+            if (!isOfflineMode && supabaseClient && state.currentUser) {
+                log('☁️ Clearing all cloud data...');
+                try {
+                    await Promise.all([
+                        supabaseClient.from('user_progress').delete().eq('license_key', state.currentUser),
+                        supabaseClient.from('bookmarks').delete().eq('license_key', state.currentUser),
+                        supabaseClient.from('wrong_answers').delete().eq('license_key', state.currentUser),
+                        supabaseClient.from('quiz_sessions').delete().eq('license_key', state.currentUser)
+                    ]);
+                    log('✅ All cloud data cleared');
+                } catch (e) {
+                    log('⚠️ Error clearing cloud data:', e.message);
+                }
+            }
 
             closeResetModal();
             updateDashboard();
@@ -2022,7 +2363,7 @@
                 console.log('   1. Go to https://supabase.com and login');
                 console.log('   2. Select your project');
                 console.log('   3. Click "Settings" (gear icon) → "API"');
-                console.log('   4. Copy "Project URL" and "anon public" key under "Project API keys"');
+                console.log('   4. Copy "Project URL" and "Publishable Key" (public) under "Project API keys"');
                 console.log('');
                 return false;
             }
@@ -2158,9 +2499,122 @@
             console.log('   User:', state.currentUser || 'Not logged in');
             console.log('   Questions loaded:', state.questions.length);
             console.log('   Supabase client:', supabaseClient ? '✅ Created' : '❌ Not created');
+            console.log('   SUPABASE_URL:', SUPABASE_URL);
+            console.log('   SUPABASE_PUBLISHABLE_KEY:', SUPABASE_PUBLISHABLE_KEY ? SUPABASE_PUBLISHABLE_KEY.substring(0, 30) + '...' : 'NOT SET');
             console.log('');
-            console.log('💡 Run testSupabase() for detailed connection test');
+            console.log('💡 Commands:');
+            console.log('   testSupabase()  - Full connection test');
+            console.log('   reconnect()     - Force reconnect to Supabase');
             console.log('');
+        };
+
+        // Force reconnect to Supabase
+        window.reconnect = async function () {
+            console.log('');
+            console.log('🔄 ========== FORCING RECONNECTION ==========');
+
+            // Reset state
+            isOfflineMode = true;
+            supabaseClient = null;
+
+            // Try to reconnect
+            await initSupabase();
+
+            // Show result
+            console.log('');
+            console.log('📋 Reconnection Result:');
+            console.log('   Mode:', isOfflineMode ? '📴 OFFLINE' : '☁️ CLOUD');
+            console.log('   Supabase client:', supabaseClient ? '✅ Created' : '❌ Not created');
+
+            if (!isOfflineMode) {
+                console.log('');
+                console.log('✅ SUCCESS! Now running in CLOUD mode');
+                console.log('   Refreshing the page to apply changes...');
+                updateSyncStatus('synced');
+                document.getElementById('cloudStatusText').innerHTML =
+                    '<i class="fas fa-cloud"></i><span>Connected to cloud - progress syncs across devices</span>';
+            } else {
+                console.log('');
+                console.log('❌ Still in OFFLINE mode. Check the logs above for errors.');
+            }
+            console.log('');
+        };
+
+        // Manual sync test function
+        window.testSync = async function () {
+            console.log('');
+            console.log('╔════════════════════════════════════════════════════════════╗');
+            console.log('║           CLOUD SYNC TEST                                  ║');
+            console.log('╚════════════════════════════════════════════════════════════╝');
+            console.log('');
+
+            if (isOfflineMode) {
+                console.log('❌ Cannot test sync - running in OFFLINE mode');
+                console.log('   Configure Supabase credentials first');
+                return false;
+            }
+
+            if (!state.currentUser) {
+                console.log('❌ Cannot test sync - no user logged in');
+                console.log('   Login with a license key first');
+                return false;
+            }
+
+            console.log('📋 Current State:');
+            console.log('   User:', state.currentUser);
+            console.log('   Progress entries:', Object.keys(state.sectionProgress).length);
+            console.log('   Bookmarks:', state.bookmarks.length);
+            console.log('   Wrong answers:', state.wrongAnswers.length);
+            console.log('   Saved quiz:', state.savedQuiz ? 'Yes' : 'No');
+            console.log('');
+
+            console.log('☁️ Testing sync to cloud...');
+            await syncAllToCloud();
+            console.log('');
+
+            console.log('☁️ Verifying data in cloud...');
+
+            // Check progress
+            const { data: progress } = await supabaseClient
+                .from('user_progress')
+                .select('*')
+                .eq('license_key', state.currentUser);
+            console.log('   Progress records in DB:', progress ? progress.length : 0);
+            if (progress) progress.forEach(p => console.log('      •', p.section_id, ':', p.percentage + '%'));
+
+            // Check bookmarks
+            const { data: bookmarks } = await supabaseClient
+                .from('bookmarks')
+                .select('*')
+                .eq('license_key', state.currentUser);
+            console.log('   Bookmarks in DB:', bookmarks ? bookmarks.length : 0);
+
+            // Check wrong answers
+            const { data: wrong } = await supabaseClient
+                .from('wrong_answers')
+                .select('*')
+                .eq('license_key', state.currentUser);
+            console.log('   Wrong answers in DB:', wrong ? wrong.length : 0);
+
+            // Check quiz session
+            const { data: session } = await supabaseClient
+                .from('quiz_sessions')
+                .select('*')
+                .eq('license_key', state.currentUser);
+            console.log('   Quiz sessions in DB:', session ? session.length : 0);
+
+            console.log('');
+            console.log('✅ Sync test complete!');
+            console.log('');
+
+            return true;
+        };
+
+        // Force sync function
+        window.forceSync = async function () {
+            console.log('🔄 Forcing sync to cloud...');
+            await syncAllToCloud();
+            console.log('✅ Force sync complete');
         };
 
         // Show available commands on load
@@ -2168,6 +2622,9 @@
         console.log('🔧 SN Quiz App - Debug Commands:');
         console.log('   • testSupabase() - Test Supabase connection');
         console.log('   • checkStatus()  - Show app status');
+        console.log('   • reconnect()    - Force reconnect to Supabase');
+        console.log('   • testSync()     - Test cloud sync');
+        console.log('   • forceSync()    - Force sync all data to cloud');
         console.log('');
 
         // ==================== START APP ====================
